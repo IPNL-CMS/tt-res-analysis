@@ -23,7 +23,9 @@ class JetMETReader;
  * that gets the highest rank.
  * 
  * Reconstruction of the neutrino is delegated to the derived class. If multiple candidates can
- * be reconstructed in a single event, it must choose the most suitable one.
+ * be reconstructed in a single event, it must choose the most suitable one. It provides
+ * reconstructed neutrino and also selected charged lepton by implementing pure virtual methods
+ * GetLepton and GetNeutrino.
  * 
  * No reconstruction is performed if an event contains less than four jets satisfying the
  * selection. However, this plugin never rejects events.
@@ -83,6 +85,12 @@ public:
      */
     Jet const &GetJet(DecayJet type) const;
     
+    /// A pure virtual method to return charged lepton from the t->blv decay
+    virtual Lepton const &GetLepton() const = 0;
+    
+    /// A pure virual method to return reconstructed neutrino from the t->blv decay
+    virtual Candidate const &GetNeutrino() const = 0;
+    
     /**
      * \brief Returns rank of the accepted interpretation of the current event
      * 
@@ -90,8 +98,11 @@ public:
      */
     double GetRank() const;
     
-    /// A pure virual method to return reconstructed neutrino from the t->blv decay
-    virtual Candidate const &GetNeutrino() const = 0;
+    /// Compute and return four-momentum of reconstructed leptonically decaying top quark
+    TLorentzVector GetTopLepP4() const;
+    
+    /// Compute and return four-momentum of reconstructed hadronically decaying top quark
+    TLorentzVector GetTopHadP4() const;
     
     /**
      * \brief Sets jet selection

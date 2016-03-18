@@ -60,6 +60,19 @@ double TTSemilepRecoBase::GetRank() const
 }
 
 
+TLorentzVector TTSemilepRecoBase::GetTopLepP4() const
+{
+    return GetLepton().P4() + GetNeutrino().P4() + GetJet(DecayJet::bTopLep).P4();
+}
+
+
+TLorentzVector TTSemilepRecoBase::GetTopHadP4() const
+{
+    return GetJet(DecayJet::bTopHad).P4() + GetJet(DecayJet::q1TopHad).P4() +
+      GetJet(DecayJet::q2TopHad).P4();
+}
+
+
 void TTSemilepRecoBase::SetJetSelection(double minPt_,
   double maxAbsEta_ /*= std::numeric_limits<double>::infinity()*/)
 {
