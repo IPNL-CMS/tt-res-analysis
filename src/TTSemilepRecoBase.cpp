@@ -83,6 +83,11 @@ void TTSemilepRecoBase::SetJetSelection(double minPt_,
 
 bool TTSemilepRecoBase::ProcessEvent()
 {
+    // Reset data describing the current-best interpretation
+    highestRank = -std::numeric_limits<double>::infinity();
+    iBTopLep = iBTopHad = iQ1TopHad = iQ2TopHad = -1;
+    
+    
     // Obtain collection of jets and apply the selection to it
     jets = &jetmetPlugin->GetJets();
     selectedJetIndices.clear();
@@ -107,9 +112,6 @@ bool TTSemilepRecoBase::ProcessEvent()
     
     
     // Loop over all possible ways of jet assignment to find the best one
-    highestRank = -std::numeric_limits<double>::infinity();
-    iBTopLep = iBTopHad = iQ1TopHad = iQ2TopHad = -1;
-    
     for (unsigned iiBTopLepCand = 0; iiBTopLepCand < nSelectedJets; ++iiBTopLepCand)
         for (unsigned iiBTopHadCand = 0; iiBTopHadCand < nSelectedJets; ++iiBTopHadCand)
         {
