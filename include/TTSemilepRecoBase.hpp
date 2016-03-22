@@ -149,15 +149,6 @@ protected:
     /// Non-owning pointer to the plugin that produces MET
     JetMETReader const *jetmetPlugin;
     
-    /**
-     * \brief Rank of the best interpretation constructed so far
-     * 
-     * When reconstruction of a new event starts, this variable is reset to -infinity. After all
-     * interpretations in an event have been considered, it contains the rank of the best
-     * interpretation.
-     */
-    double highestRank;
-    
 private:
     /// Selection on jet transverse momentum
     double minPt;
@@ -179,6 +170,15 @@ private:
      * reallocation of memory for each event.
      */
     std::vector<unsigned> selectedJetIndices;
+    
+    /**
+     * \brief Rank of the best interpretation constructed so far
+     * 
+     * When reconstruction of a new event starts, this variable is reset to -infinity. After all
+     * interpretations in an event have been considered, it contains the rank of the best
+     * interpretation.
+     */
+    double highestRank;
     
     /**
      * \brief Indices of jets identified as decay products of the top quarks
