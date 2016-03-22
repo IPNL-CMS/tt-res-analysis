@@ -125,8 +125,8 @@ protected:
      * If the event contain less than for jets satisfying the selection, reconstruction is not
      * performed. In this case the highest rank is set to -infinity.
      * 
-     * Provided collection of jets must exist until the end of processing of the current event. A
-     * pointer to it is saved and can be used later to access identified jets.
+     * Provided collection of jets must exist and not be reallocated until the end of processing of
+     * the current event. This plugin will save pointers to identified jets.
      */
     void PerformJetAssignment(std::vector<Jet> const &jets);
     
@@ -157,13 +157,6 @@ private:
     double maxAbsEta;
     
     /**
-     * \brief Non-owning pointer to input collection of jets
-     * 
-     * Needed to allow user to access identified jets.
-     */
-    std::vector<Jet> const *jets;
-    
-    /**
      * \brief Indices of jets that pass the selection on pt and |eta|
      * 
      * This vector is only used in the method PerformJetAssignment but placed here to avoid
@@ -181,9 +174,9 @@ private:
     double highestRank;
     
     /**
-     * \brief Indices of jets identified as decay products of the top quarks
+     * \brief Non-owning pointers to jets identified as decay products of the top quarks
      * 
-     * Indices correspond to collection *jets.
+     * Pointers refer to jets in the collection provided by the jet reader.
      */
-    unsigned iBTopLep, iBTopHad, iQ1TopHad, iQ2TopHad;
+    Jet const *bTopLep, *bTopHad, *q1TopHad, *q2TopHad;
 };
