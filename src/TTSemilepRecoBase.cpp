@@ -81,15 +81,15 @@ void TTSemilepRecoBase::SetJetSelection(double minPt_,
 }
 
 
-bool TTSemilepRecoBase::ProcessEvent()
+void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets_)
 {
     // Reset data describing the current-best interpretation
     highestRank = -std::numeric_limits<double>::infinity();
     iBTopLep = iBTopHad = iQ1TopHad = iQ2TopHad = -1;
     
     
-    // Obtain collection of jets and apply the selection to it
-    jets = &jetmetPlugin->GetJets();
+    // Save a pointer to the collection of jets and apply the selection to it
+    jets = &jets_;
     selectedJetIndices.clear();
     
     for (unsigned i = 0; i < jets->size(); ++i)
@@ -106,9 +106,9 @@ bool TTSemilepRecoBase::ProcessEvent()
     unsigned const nSelectedJets = selectedJetIndices.size();
     
     
-    // Do not attempt reconstruction if there is not enough jets. However, do not reject the event
-    if (selectedJetIndices.size() < 4)
-        return true;
+    // Do not attempt reconstruction if there is not enough jets
+    if (nSelectedJets < 4)
+        return;
     
     
     // Loop over all possible ways of jet assignment to find the best one
@@ -146,7 +146,12 @@ bool TTSemilepRecoBase::ProcessEvent()
                 }
             }
         }
-    
+}
+
+
+bool TTSemilepRecoBase::ProcessEvent()
+{
+    PerformJetAssignment(jetmetPlugin->GetJets());
     
     // Always return true since this plugin does not perform event filtering
     return true;

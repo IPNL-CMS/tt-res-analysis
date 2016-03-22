@@ -111,24 +111,30 @@ public:
      */
     void SetJetSelection(double minPt, double maxAbsEta = std::numeric_limits<double>::infinity());
     
+protected:
+    /**
+     * \brief Performs jet assignment in the current event
+     * 
+     * Considers all possible ways to choose four reconsted jets and match them to decay products
+     * of a pair of top quarks. Jets must satisfy the selection on pt and |eta|. For each possible
+     * interpretation its rank is computed with method ComputeRank, and the interpretation with the
+     * highest rank is accepted.
+     * 
+     * If the event contain less than for jets satisfying the selection, reconstruction is not
+     * performed. In this case the highest rank is set to -infinity.
+     * 
+     * Provided collection of jets must exist until the end of processing of the current event. A
+     * pointer to it is saved and can be used later to access identified jets.
+     */
+    void PerformJetAssignment(std::vector<Jet> const &jets);
+    
 private:
     /// A pure virtual method to calculate rank of a given interpretation of the current event
     virtual double ComputeRank(Jet const &bTopLep, Jet const &bTopHad, Jet const &q1TopHad,
       Jet const &q2TopHad) = 0;
     
     /**
-     * \brief Performs reconstruction of the current event
-     * 
-     * Considers all possible ways to choose four reconsted jets and match them to decay products
-     * of a pair of top quarks. Jets must satisfy the selection on pt and |eta|. For each possible
-     * interpretation its rank is computed with method ComputeRank, and the one with the highest
-     * rank is accepted.
-     * 
-     * If the event contain less than for jets satisfying the selection, reconstruction is not
-     * performed. However, the method always returns true.
-     * 
-     * User may override this method, for instance, to read additional information from the
-     * event, but the method of the base class must be called.
+     * \brief Performs reconstruction of the current event by calling PerformJetAssignment
      * 
      * Implemented from Plugin.
      */
@@ -167,8 +173,8 @@ private:
     /**
      * \brief Indices of jets that pass the selection on pt and |eta|
      * 
-     * This vector is only used in the method ProcessEvent but placed here to avoid reallocation
-     * of memory for each event.
+     * This vector is only used in the method PerformJetAssignment but placed here to avoid
+     * reallocation of memory for each event.
      */
     std::vector<unsigned> selectedJetIndices;
     
