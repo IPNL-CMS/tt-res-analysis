@@ -75,6 +75,12 @@ double TTSemilepRecoBase::GetRank() const
 }
 
 
+bool TTSemilepRecoBase::GetRecoStatus() const
+{
+    return recoSuccess;
+}
+
+
 TLorentzVector TTSemilepRecoBase::GetTopLepP4() const
 {
     return GetLepton().P4() + GetNeutrino().P4() + GetJet(DecayJet::bTopLep).P4();
@@ -98,6 +104,8 @@ void TTSemilepRecoBase::SetJetSelection(double minPt_,
 
 void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
 {
+    recoSuccess = false;
+    
     // Reset data describing the current-best interpretation
     highestRank = -std::numeric_limits<double>::infinity();
     bTopLep = bTopHad = q1TopHad = q2TopHad = nullptr;
@@ -160,6 +168,15 @@ void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
                 }
             }
         }
+    
+    
+    recoSuccess = true;
+}
+
+
+void TTSemilepRecoBase::SetRecoFailure()
+{
+    recoSuccess = false;
 }
 
 

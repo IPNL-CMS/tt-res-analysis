@@ -183,7 +183,10 @@ bool TTSemilepRecoChi2::ProcessEvent()
     // Do not attempt reconstruction if the current event contains no leptons or no reconstructed
     // neutrinos. However, do not reject the event
     if (leptonPlugin->GetLeptons().size() == 0 or nuRecoPlugin->GetNeutrinos().size() == 0)
+    {
+        SetRecoFailure();
         return true;
+    }
     
     
     // Perform jet assigment calling dedicated method from the base class

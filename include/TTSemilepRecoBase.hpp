@@ -100,6 +100,15 @@ public:
      */
     double GetRank() const;
     
+    /**
+     * \brief Reports if reconstruction of the current event has been successful
+     * 
+     * Returns false if reconstruction of the current event has been aborted. This happens if the
+     * event contains less than four jets passing the selection or if reconstruction failure is
+     * declared by a derived class.
+     */
+    bool GetRecoStatus() const;
+    
     /// Compute and return four-momentum of reconstructed leptonically decaying top quark
     TLorentzVector GetTopLepP4() const;
     
@@ -129,6 +138,9 @@ protected:
      * the current event. This plugin will save pointers to identified jets.
      */
     void PerformJetAssignment(std::vector<Jet> const &jets);
+    
+    /// Declares that reconstuction of the current event has been aborted
+    void SetRecoFailure();
     
 private:
     /// A pure virtual method to calculate rank of a given interpretation of the current event
@@ -163,6 +175,9 @@ private:
      * reallocation of memory for each event.
      */
     std::vector<unsigned> selectedJetIndices;
+    
+    /// Flag showing whether reconstruction of the current event has been successful
+    bool recoSuccess;
     
     /**
      * \brief Rank of the best interpretation constructed so far
