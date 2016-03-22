@@ -9,6 +9,7 @@
 
 TTSemilepRecoBase::TTSemilepRecoBase(std::string name /*= "TTReco"*/):
     AnalysisPlugin(name),
+    jetmetPluginName("JetMET"), jetmetPlugin(nullptr),
     minPt(0.), maxAbsEta(std::numeric_limits<double>::infinity())
 {}
 

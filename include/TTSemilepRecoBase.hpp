@@ -29,6 +29,8 @@ class JetMETReader;
  * 
  * No reconstruction is performed if an event contains less than four jets satisfying the
  * selection. However, this plugin never rejects events.
+ * 
+ * This plugin relies on a jet reader with the default name "JetMET".
  */
 class TTSemilepRecoBase: public AnalysisPlugin
 {
