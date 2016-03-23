@@ -3,6 +3,8 @@
 #include <PECFwk/core/LeptonReader.hpp>
 #include <PECFwk/core/JetMETReader.hpp>
 
+#include <TVector3.h>
+
 #include <cassert>
 #include <cmath>
 
@@ -42,24 +44,24 @@ bool NuRecoRunI::ProcessEvent()
     
     // Reconstruct neutrino. Code is copied from this method [1], with non-essential modifications
     //[1] https://github.com/IPNL-CMS/MttExtractorAnalysis/blob/a198a88bbaccd26c79fef9095ea558416eb2f9e9/plugins/SortingAlgorithm.cc#L9
-    TLorentzVector nuP4(metP4);
+    TVector3 nuP3(metP4.Px(), metP4.Py(), 0.);
     
     // Standard quadratic equation for neutrino pz:
     //  a * pz(nu)^2 + b * pz(nu) + c = 0,
     // which originates from the mass constraint m(l+nu) = m(W)
     const double m_w = 80.419;
     double const lambda = (m_w * m_w - leptonP4.M() * leptonP4.M() +
-      2 * (nuP4.Px() * leptonP4.Px() + nuP4.Py() * leptonP4.Py())) / (2 * leptonP4.E());
+      2 * (nuP3.Px() * leptonP4.Px() + nuP3.Py() * leptonP4.Py())) / (2 * leptonP4.E());
     double const a = 1. - std::pow(leptonP4.Pz() / leptonP4.E(), 2);
     double const b = -2 * (leptonP4.Pz() / leptonP4.E()) * lambda;
-    double const c = nuP4.Pt() * nuP4.Pt() - lambda * lambda;
+    double const c = nuP3.Pt() * nuP3.Pt() - lambda * lambda;
     
     if (a == 0.)
     {
         // This is actually a linear equation (although this should not happen in real life)
         assert(b != 0);
-        nuP4.SetPz(-c / b);
-        neutrinos.emplace_back(nuP4);
+        nuP3.SetZ(-c / b);
+        neutrinos.emplace_back(TLorentzVector(nuP3, nuP3.Mag()));
         
         return true;
     }
@@ -72,24 +74,24 @@ bool NuRecoRunI::ProcessEvent()
         // The equation has two real-valued solutions. Both corresponding neutrino candidates are
         //recorded
         
-        nuP4.SetPz((-b - std::sqrt(discriminant)) / (2 * a));
-        neutrinos.emplace_back(nuP4);
+        nuP3.SetZ((-b - std::sqrt(discriminant)) / (2 * a));
+        neutrinos.emplace_back(TLorentzVector(nuP3, nuP3.Mag()));
         
-        nuP4.SetPz((-b + std::sqrt(discriminant)) / (2 * a));
-        neutrinos.emplace_back(nuP4);
+        nuP3.SetZ((-b + std::sqrt(discriminant)) / (2 * a));
+        neutrinos.emplace_back(TLorentzVector(nuP3, nuP3.Mag()));
     }
     else
     {
         // There are no real-valued solutions. Will minimally modify the value of MET, while
         //keeping its direction in the transverse plane, to obtain a zero discriminant
         
-        double gamma_x = leptonP4.Px() / std::sqrt(1. + std::pow(nuP4.Py() / nuP4.Px(), 2));
-        double gamma_y = leptonP4.Py() / std::sqrt(1. + std::pow(nuP4.Px() / nuP4.Py(), 2));
+        double gamma_x = leptonP4.Px() / std::sqrt(1. + std::pow(nuP3.Py() / nuP3.Px(), 2));
+        double gamma_y = leptonP4.Py() / std::sqrt(1. + std::pow(nuP3.Px() / nuP3.Py(), 2));
         
-        if (nuP4.Px() < 0.)
+        if (nuP3.Px() < 0.)
             gamma_x = -gamma_x;
         
-        if (nuP4.Py() < 0.)
+        if (nuP3.Py() < 0.)
             gamma_y = -gamma_y;
         
         
@@ -128,7 +130,7 @@ bool NuRecoRunI::ProcessEvent()
             if (met1 > 0. and met2 > 0.)
             {
                 // Choose the solution which is closest to the measured MET
-                if (std::fabs(nuP4.Pt() - met1) < std::fabs(nuP4.Pt() - met2))
+                if (std::fabs(nuP3.Pt() - met1) < std::fabs(nuP3.Pt() - met2))
                     adjustedMET = met1;
                 else
                     adjustedMET = met2;
@@ -147,18 +149,18 @@ bool NuRecoRunI::ProcessEvent()
         
         
         // Modify MET value
-        nuP4.SetPtEtaPhiM(adjustedMET, 0., nuP4.Phi(), 0.);
+        nuP3.SetPtEtaPhi(adjustedMET, 0., nuP3.Phi());
         
         
         // By construction, with the adjusted value of MET the discriminant of the quadratic
         //equation for pz(nu) is zero. Find its solution.
         double const lambdaAdjusted = (m_w * m_w - leptonP4.M() * leptonP4.M() +
-          2 * (nuP4.Px() * leptonP4.Px() + nuP4.Py() * leptonP4.Py())) / (2 * leptonP4.E());
+          2 * (nuP3.Px() * leptonP4.Px() + nuP3.Py() * leptonP4.Py())) / (2 * leptonP4.E());
         double const aAdjusted = 1. - std::pow(leptonP4.Pz() / leptonP4.E(), 2);
         double const bAdjusted = -2 * (leptonP4.Pz() / leptonP4.E()) * lambdaAdjusted;
         
-        nuP4.SetPz(-bAdjusted / (2 * aAdjusted));
-        neutrinos.emplace_back(nuP4);
+        nuP3.SetZ(-bAdjusted / (2 * aAdjusted));
+        neutrinos.emplace_back(TLorentzVector(nuP3, nuP3.Mag()));
     }
     
     
