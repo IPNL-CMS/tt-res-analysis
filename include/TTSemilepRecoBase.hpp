@@ -1,8 +1,8 @@
 #pragma once
 
-#include <PECFwk/core/AnalysisPlugin.hpp>
+#include <mensura/core/AnalysisPlugin.hpp>
 
-#include <PECFwk/core/PhysicsObjects.hpp>
+#include <mensura/core/PhysicsObjects.hpp>
 
 #include <limits>
 #include <string>

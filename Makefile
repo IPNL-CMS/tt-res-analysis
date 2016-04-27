@@ -4,8 +4,8 @@ ifeq ($(TTRES_ANALYSIS_INSTALL), )
 endif
 
 # Check if the installation path of PECFwk is provided
-ifeq ($(PEC_FWK_INSTALL), )
-  $(error Mandatory environment variable PEC_FWK_INSTALL is not set)
+ifeq ($(MENSURA_INSTALL), )
+  $(error Mandatory environment variable MENSURA_INSTALL is not set)
 endif
 
 # Make sure ROOT is available
@@ -16,7 +16,7 @@ endif
 
 # Flags to control compilation and linking
 CC = g++
-INCLUDE = -I$(TTRES_ANALYSIS_INSTALL)/include -I$(PEC_FWK_INSTALL)/include -I$(shell root-config --incdir)
+INCLUDE = -I$(TTRES_ANALYSIS_INSTALL)/include -I$(MENSURA_INSTALL)/include -I$(shell root-config --incdir)
 OPFLAGS = -O2
 CFLAGS = -Wall -Wextra -Wno-unused-function -fPIC -std=c++14 $(INCLUDE) $(OPFLAGS)
 
