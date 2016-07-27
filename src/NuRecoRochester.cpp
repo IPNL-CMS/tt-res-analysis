@@ -1,58 +1,18 @@
 #include <NuRecoRochester.hpp>
 
+#include <TVector3.h>
 
-TMatrixD NeutrinoSolver::RotationX(double a)
-{
-    double ca = Cos(a);
-    double sa = Sin(a);
-    TMatrixD D(3, 3);
-    D(0, 0) = 1.; 
-    D(1, 0) = 0.; 
-    D(2, 0) = 0.; 
-    D(0, 1) = 0.; 
-    D(1, 1) = ca; 
-    D(2, 1) = sa; 
-    D(0, 2) = 0.; 
-    D(1, 2) = -sa; 
-    D(2, 2) = ca;
-    return(D);
-}
+#include <iostream>
 
-TMatrixD NeutrinoSolver::RotationY(double a)
-{
-    double ca = Cos(a);
-    double sa = Sin(a);
-    TMatrixD D(3, 3);
-    D(0, 0) = ca; 
-    D(1, 0) = 0.; 
-    D(2, 0) = -sa; 
-    D(0, 1) = 0.; 
-    D(1, 1) = 1.; 
-    D(2, 1) = 0.; 
-    D(0, 2) = sa; 
-    D(1, 2) = 0.; 
-    D(2, 2) = ca;
-    return(D);
-}
 
-TMatrixD NeutrinoSolver::RotationZ(double a)
-{
-    double ca = Cos(a);
-    double sa = Sin(a);
-    TMatrixD D(3, 3);
-    D(0, 0) = ca; 
-    D(1, 0) = sa; 
-    D(2, 0) = 0.; 
-    D(0, 1) = -sa; 
-    D(1, 1) = ca; 
-    D(2, 1) = 0.; 
-    D(0, 2) = 0; 
-    D(1, 2) = 0.; 
-    D(2, 2) = 1.;
-    return(D);
-}
+using namespace std;
+using namespace TMath;
 
-NeutrinoSolver::NeutrinoSolver(const TLorentzVector* lep, const TLorentzVector* bjet, double MW, double MT) : ERROR(false), H(3, 3), T(3,1), MET(2, 1), VM(2, 2)
+
+NuRecoRochester::NuRecoRochester(TLorentzVector const *lep, TLorentzVector const *bjet,
+  double MW, double MT):
+    ERROR(false),
+    H(3, 3), T(3,1), MET(2, 1), VM(2, 2)
 {
     Mt = MT;
     Mw = MW;
@@ -156,71 +116,9 @@ NeutrinoSolver::NeutrinoSolver(const TLorentzVector* lep, const TLorentzVector* 
     H=R1*R2*R3*Ht;
 }
 
-void NeutrinoSolver::Solve(double t)
-{
-    T(0, 0) = Cos(t);
-    T(1, 0) = Sin(t);
-    T(2, 0) = 1.;
 
-    T = H*T;
-}
-
-TLorentzVector NeutrinoSolver::GetSolution(double t)
-{
-    Solve(t);
-    return TLorentzVector(T(0,0), T(1,0), T(2,0), Sqrt(T(0,0)*T(0,0) + T(1,0)*T(1,0) + T(2,0)*T(2,0) + Mn*Mn));
-}
-
-TMatrixD NeutrinoSolver::GetPtSolution(double t)
-{
-    Solve(t);
-    TMatrixD res(2,1);
-    res(0,0) = T(0,0);
-    res(1,0) = T(1,0);
-
-    return(res);
-}
-
-double NeutrinoSolver::Chi2(double t)
-{
-    TMatrixD SOL(GetPtSolution(t));
-    return(((MET-SOL).T()*VM*(MET-SOL))(0,0));
-}
-
-pair<double, double> NeutrinoSolver::Extrem(double t, bool MIN)
-{
-    double sign = -1.;
-    if(MIN){sign = 1.;}
-    double step = 0.05;
-    double old = sign*Chi2(t);
-    bool right = true;
-    while(Abs(step) > 0.00001)
-    {
-        double n = sign*Chi2(t+step);
-        //cout << old << " " << n << " " << t << " " << step << endl;
-        if(n < old)
-        {
-            t = t + step;
-            old = n;
-            right = true;
-        }   
-        else
-        {
-            if(right)
-            {
-                step = (-0.5*step);
-            }
-            else
-            {
-                step = (-1.*step);
-                right = false;
-            }
-        }
-    }
-    return pair<double, double>(t, old);
-}
-
-TLorentzVector NeutrinoSolver::GetBest(double metx, double mety, double metxerr, double metyerr, double metxyrho, double& test, bool INFO)
+TLorentzVector NuRecoRochester::GetBest(double metx, double mety, double metxerr, double metyerr,
+  double metxyrho, double &test, bool INFO)
 {
     if(ERROR){ test = -1; return(TLorentzVector(0.,0.,0.,0.));}
 
@@ -259,57 +157,128 @@ TLorentzVector NeutrinoSolver::GetBest(double metx, double mety, double metxerr,
         test = minimuma.second;
         return(GetSolution(minimuma.first));    
     }
+}
 
 
-//  double testmin = 1E100;
-//  double t = 0.;
-//  for(double tb = 0 ; tb < 6.4 ; tb+=0.1)
-//  {
-//      double test = Chi2(tb);
-//      if(test < testmin)
-//      {
-//          testmin = test;
-//          t = tb;
-//      }
-//  }
-//  double step = 0.05;
-//  double old = Chi2(t);
-//  bool right = true;
-//  while(Abs(step) > 0.00001)
-//  {
-//      double n = Chi2(t+step);
-//      //cout << old << " " << n << " " << t << " " << step << endl;
-//      if(n < old)
-//      {
-//          t = t + step;
-//          old = n;
-//          right = true;
-//      }   
-//      else
-//      {
-//          if(right)
-//          {
-//              step = (-0.5*step);
-//          }
-//          else
-//          {
-//              step = (-1.*step);
-//              right = false;
-//          }
-//      }
-//  }
-//
-//
-////    if(old > 10)
-////    {
-////        cout << "Solution: " << t << " " << old << endl;
-////        for(double tb = 0 ; tb < 7 ; tb+=0.01)
-////        {
-////            cout << tb << " " << Chi2(tb) << endl;
-////        }
-////    }
-//
-//  test = old;
-//
-//  return(GetSolution(t)); 
+TMatrixD NuRecoRochester::RotationX(double a)
+{
+    double ca = Cos(a);
+    double sa = Sin(a);
+    TMatrixD D(3, 3);
+    D(0, 0) = 1.; 
+    D(1, 0) = 0.; 
+    D(2, 0) = 0.; 
+    D(0, 1) = 0.; 
+    D(1, 1) = ca; 
+    D(2, 1) = sa; 
+    D(0, 2) = 0.; 
+    D(1, 2) = -sa; 
+    D(2, 2) = ca;
+    return(D);
+}
+
+
+TMatrixD NuRecoRochester::RotationY(double a)
+{
+    double ca = Cos(a);
+    double sa = Sin(a);
+    TMatrixD D(3, 3);
+    D(0, 0) = ca; 
+    D(1, 0) = 0.; 
+    D(2, 0) = -sa; 
+    D(0, 1) = 0.; 
+    D(1, 1) = 1.; 
+    D(2, 1) = 0.; 
+    D(0, 2) = sa; 
+    D(1, 2) = 0.; 
+    D(2, 2) = ca;
+    return(D);
+}
+
+
+TMatrixD NuRecoRochester::RotationZ(double a)
+{
+    double ca = Cos(a);
+    double sa = Sin(a);
+    TMatrixD D(3, 3);
+    D(0, 0) = ca; 
+    D(1, 0) = sa; 
+    D(2, 0) = 0.; 
+    D(0, 1) = -sa; 
+    D(1, 1) = ca; 
+    D(2, 1) = 0.; 
+    D(0, 2) = 0; 
+    D(1, 2) = 0.; 
+    D(2, 2) = 1.;
+    return(D);
+}
+
+
+void NuRecoRochester::Solve(double t)
+{
+    T(0, 0) = Cos(t);
+    T(1, 0) = Sin(t);
+    T(2, 0) = 1.;
+
+    T = H*T;
+}
+
+
+TLorentzVector NuRecoRochester::GetSolution(double t)
+{
+    Solve(t);
+    return TLorentzVector(T(0,0), T(1,0), T(2,0), Sqrt(T(0,0)*T(0,0) + T(1,0)*T(1,0) + T(2,0)*T(2,0) + Mn*Mn));
+    //^ Arguments are px, py, pz, E
+}
+
+
+TMatrixD NuRecoRochester::GetPtSolution(double t)
+{
+    Solve(t);
+    TMatrixD res(2,1);
+    res(0,0) = T(0,0);
+    res(1,0) = T(1,0);
+
+    return(res);
+}
+
+
+double NuRecoRochester::Chi2(double t)
+{
+    TMatrixD SOL(GetPtSolution(t));
+    return(((MET-SOL).T()*VM*(MET-SOL))(0,0));
+}
+
+
+pair<double, double> NuRecoRochester::Extrem(double t, bool MIN)
+{
+    double sign = -1.;
+    if(MIN){sign = 1.;}
+    double step = 0.05;
+    double old = sign*Chi2(t);
+    bool right = true;
+    while(Abs(step) > 0.00001)
+    {
+        double n = sign*Chi2(t+step);
+        //cout << old << " " << n << " " << t << " " << step << endl;
+        if(n < old)
+        {
+            t = t + step;
+            old = n;
+            right = true;
+        }   
+        else
+        {
+            if(right)
+            {
+                step = (-0.5*step);
+            }
+            else
+            {
+                step = (-1.*step);
+                right = false;
+            }
+        }
+    }
+    return pair<double, double>(t, old);
 }
