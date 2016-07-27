@@ -35,6 +35,14 @@ public:
     
 public:
     /**
+     * \brief Check if neutrino can be reconstructed in the given configuration
+     * 
+     * The corresponding flag is set in the constructor, thus there is no need to call method
+     * GetBest beforehand.
+     */
+    bool IsReconstructable() const;
+    
+    /**
      * \brief Finds neutrino solution that minimizes figure of merit computed by method Chi2
      * 
      * Parameter test will contain the computed figure of merit. Version of the algorithm described

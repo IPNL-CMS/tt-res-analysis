@@ -14,10 +14,6 @@ TTSemilepRecoBase::TTSemilepRecoBase(std::string name /*= "TTReco"*/):
 {}
 
 
-TTSemilepRecoBase::~TTSemilepRecoBase() noexcept
-{}
-
-
 TTSemilepRecoBase::TTSemilepRecoBase(TTSemilepRecoBase const &src) noexcept:
     AnalysisPlugin(src),
     jetmetPluginName(src.jetmetPluginName), jetmetPlugin(nullptr),
@@ -28,8 +24,7 @@ TTSemilepRecoBase::TTSemilepRecoBase(TTSemilepRecoBase const &src) noexcept:
 void TTSemilepRecoBase::BeginRun(Dataset const &)
 {
     // Save pointer to jet reader
-    jetmetPlugin = dynamic_cast<JetMETReader const *>(
-      GetMaster().GetPluginBefore(jetmetPluginName, GetName()));
+    jetmetPlugin = dynamic_cast<JetMETReader const *>(GetDependencyPlugin(jetmetPluginName));
 }
 
 

@@ -58,9 +58,6 @@ public:
     /// Assignment operator is deleted
     TTSemilepRecoBase &operator=(TTSemilepRecoBase const &) = delete;
     
-    /// Trivial destructor
-    virtual ~TTSemilepRecoBase() noexcept;
-    
 protected:
     /**
      * \brief Copy constructor
