@@ -119,7 +119,7 @@ NuRecoRochester::NuRecoRochester(TLorentzVector const *lep, TLorentzVector const
 
 bool NuRecoRochester::IsReconstructable() const
 {
-    return ERROR;
+    return not ERROR;
 }
 
 
