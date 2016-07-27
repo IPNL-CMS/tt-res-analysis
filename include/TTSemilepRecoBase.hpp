@@ -98,13 +98,14 @@ public:
     double GetRank() const;
     
     /**
-     * \brief Reports if reconstruction of the current event has been successful
+     * \brief Returns status code showing whether the reconstruction has succeeded
      * 
-     * Returns false if reconstruction of the current event has been aborted. This happens if the
-     * event contains less than four jets passing the selection or if reconstruction failure is
-     * declared by a derived class.
+     * Code 0 indicates a successful reconstruction, any other points to a failure, and its value
+     * provides information about the reason of the failure. In the base class this can only happen
+     * if an event contains less than four jets passing the selection. In this case status is set
+     * to 1. A derived class can declare failures using method SetRecoFailure.
      */
-    bool GetRecoStatus() const;
+    unsigned GetRecoStatus() const;
     
     /// Compute and return four-momentum of reconstructed leptonically decaying top quark
     TLorentzVector GetTopLepP4() const;
@@ -136,8 +137,12 @@ protected:
      */
     void PerformJetAssignment(std::vector<Jet> const &jets);
     
-    /// Declares that reconstuction of the current event has been aborted
-    void SetRecoFailure();
+    /**
+     * \brief Indicates that reconstruction has failed and specifies error code
+     * 
+     * Consult documentation for method GetRecoStatus for the discussion of error codes.
+     */
+    void SetRecoFailure(unsigned code);
     
 private:
     /// A pure virtual method to calculate rank of a given interpretation of the current event
@@ -173,8 +178,13 @@ private:
      */
     std::vector<unsigned> selectedJetIndices;
     
-    /// Flag showing whether reconstruction of the current event has been successful
-    bool recoSuccess;
+    /**
+     * \brief Status code indicating success of failure of reconstruction
+     * 
+     * Code 0 indicates a successful reconstruction. Other values denote failures and describe
+     * their reasons.
+     */
+    unsigned recoStatus;
     
     /**
      * \brief Rank of the best interpretation constructed so far

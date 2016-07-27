@@ -70,9 +70,9 @@ double TTSemilepRecoBase::GetRank() const
 }
 
 
-bool TTSemilepRecoBase::GetRecoStatus() const
+unsigned TTSemilepRecoBase::GetRecoStatus() const
 {
-    return recoSuccess;
+    return recoStatus;
 }
 
 
@@ -99,8 +99,6 @@ void TTSemilepRecoBase::SetJetSelection(double minPt_,
 
 void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
 {
-    recoSuccess = false;
-    
     // Reset data describing the current-best interpretation
     highestRank = -std::numeric_limits<double>::infinity();
     bTopLep = bTopHad = q1TopHad = q2TopHad = nullptr;
@@ -125,7 +123,10 @@ void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
     
     // Do not attempt reconstruction if there is not enough jets
     if (nSelectedJets < 4)
+    {
+        recoStatus = 1;
         return;
+    }
     
     
     // Loop over all possible ways of jet assignment to find the best one
@@ -165,13 +166,13 @@ void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
         }
     
     
-    recoSuccess = true;
+    recoStatus = 0;
 }
 
 
-void TTSemilepRecoBase::SetRecoFailure()
+void TTSemilepRecoBase::SetRecoFailure(unsigned code)
 {
-    recoSuccess = false;
+    recoStatus = code;
 }
 
 

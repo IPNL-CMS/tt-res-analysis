@@ -184,7 +184,7 @@ bool TTSemilepRecoRochester::ProcessEvent()
     if (leptonPlugin->GetLeptons().size() == 0)
     {
         lepton = nullptr;
-        SetRecoFailure();
+        SetRecoFailure(1);
         return true;
     }
     else
@@ -203,7 +203,7 @@ bool TTSemilepRecoRochester::ProcessEvent()
     // Declare failure of the reconstruction if the best rank is (-inf). This could have happend
     //only if all event interpretations have been rejected
     if (GetRank() == -std::numeric_limits<double>::infinity())
-        SetRecoFailure();
+        SetRecoFailure(5);
     
     
     // Always return true since this plugin does not perform event filtering

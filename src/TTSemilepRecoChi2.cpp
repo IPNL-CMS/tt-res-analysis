@@ -184,7 +184,7 @@ bool TTSemilepRecoChi2::ProcessEvent()
     // neutrinos. However, do not reject the event
     if (leptonPlugin->GetLeptons().size() == 0 or nuRecoPlugin->GetNeutrinos().size() == 0)
     {
-        SetRecoFailure();
+        SetRecoFailure(1);
         return true;
     }
     
