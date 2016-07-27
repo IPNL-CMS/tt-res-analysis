@@ -132,4 +132,7 @@ private:
     
     /// Current best neutrino candidate
     Candidate neutrino;
+    
+    /// Flags that help to deduce reason of failed reconstruction
+    bool neutrinoReconstructed, neutrinoLikelihoodInRange, massLikelihoodInRange;
 };

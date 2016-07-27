@@ -140,6 +140,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     double nuDistance;
     TLorentzVector const p4Nu(nuBuilder.GetBest(met->P4().Px(), met->P4().Py(), 1., 1., 0.,
       nuDistance));
+    neutrinoReconstructed = true;
     
     
     // Compute (logarithm of) the likelihood for the neutrino distance. If the distance falls into
@@ -149,6 +150,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     if (likelihoodNeutrino->IsBinOverflow(bin))
         return -std::numeric_limits<double>::infinity();
     
+    neutrinoLikelihoodInRange = true;
     double logLikelihood = std::log(likelihoodNeutrino->GetBinContent(bin));
     
     
@@ -165,6 +167,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     if (likelihoodMass->IsBinOverflow(bin))
         return -std::numeric_limits<double>::infinity();
     
+    massLikelihoodInRange = true;
     logLikelihood += std::log(likelihoodMass->GetBinContent(bin));
     
     
@@ -195,6 +198,8 @@ bool TTSemilepRecoRochester::ProcessEvent()
     met = &jetmetPlugin->GetMET();
     neutrino.SetPxPyPzE(0., 0., 0., 0.);
     
+    neutrinoReconstructed = neutrinoLikelihoodInRange = massLikelihoodInRange = false;
+    
     
     // Perform jet assigment calling dedicated method from the base class
     PerformJetAssignment(jetmetPlugin->GetJets());
@@ -203,7 +208,16 @@ bool TTSemilepRecoRochester::ProcessEvent()
     // Declare failure of the reconstruction if the best rank is (-inf). This could have happend
     //only if all event interpretations have been rejected
     if (GetRank() == -std::numeric_limits<double>::infinity())
-        SetRecoFailure(5);
+    {
+        if (not neutrinoReconstructed)
+            SetRecoFailure(2);
+        else if (not neutrinoLikelihoodInRange)
+            SetRecoFailure(3);
+        else if (not massLikelihoodInRange)
+            SetRecoFailure(4);
+        else
+            SetRecoFailure(5);
+    }
     
     
     // Always return true since this plugin does not perform event filtering
