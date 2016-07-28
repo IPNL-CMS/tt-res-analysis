@@ -117,12 +117,6 @@ NuRecoRochester::NuRecoRochester(TLorentzVector const *lep, TLorentzVector const
 }
 
 
-bool NuRecoRochester::IsReconstructable() const
-{
-    return not ERROR;
-}
-
-
 TLorentzVector NuRecoRochester::GetBest(double metx, double mety, double metxerr, double metyerr,
   double metxyrho, double &test, bool INFO)
 {
@@ -163,6 +157,12 @@ TLorentzVector NuRecoRochester::GetBest(double metx, double mety, double metxerr
         test = minimuma.second;
         return(GetSolution(minimuma.first));    
     }
+}
+
+
+bool NuRecoRochester::IsReconstructable() const
+{
+    return not ERROR;
 }
 
 

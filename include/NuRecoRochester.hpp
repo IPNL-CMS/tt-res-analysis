@@ -35,14 +35,6 @@ public:
     
 public:
     /**
-     * \brief Check if neutrino can be reconstructed in the given configuration
-     * 
-     * The corresponding flag is set in the constructor, thus there is no need to call method
-     * GetBest beforehand.
-     */
-    bool IsReconstructable() const;
-    
-    /**
      * \brief Finds neutrino solution that minimizes figure of merit computed by method Chi2
      * 
      * Parameter test will contain the computed figure of merit. Version of the algorithm described
@@ -53,6 +45,14 @@ public:
      */
     TLorentzVector GetBest(double metx, double mety, double metxerr, double metyerr,
       double metxyrho, double &test, bool INFO = false);
+    
+    /**
+     * \brief Check if neutrino can be reconstructed in the given configuration
+     * 
+     * The corresponding flag is set in the constructor, thus there is no need to call method
+     * GetBest beforehand.
+     */
+    bool IsReconstructable() const;
     
 private:
     /// Constructs a matrix for rotation about x axis through an angle a
@@ -90,8 +90,8 @@ private:
      * \Computes figure of merit for the neutrino solution
      * 
      * Consult documentation for method Solve for the meaning of parameter t. When the MET error
-     * matrix is identity, the returned value is the Euclidian distance in the transverse plane
-     * between the neutrino solution given by the parameter t and experimental MET.
+     * matrix is identity, the returned value is the squared Euclidian distance in the transverse
+     * plane between the neutrino solution given by the parameter t and experimental MET.
      */
     double Chi2(double t);
     

@@ -140,6 +140,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     double nuDistance;
     TLorentzVector const p4Nu(nuBuilder.GetBest(met->P4().Px(), met->P4().Py(), 1., 1., 0.,
       nuDistance));
+    nuDistance = std::sqrt(nuDistance);  // It is actually set to the squared value
     neutrinoReconstructed = true;
     
     
