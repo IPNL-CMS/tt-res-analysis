@@ -125,6 +125,11 @@ void TTSemilepRecoRochester::SetLikelihood(std::string const &path,
     likelihoodMass->SetDirectory(nullptr);
     
     ROOTLock::Unlock();
+    
+    
+    // Make sure the histograms are normalized to describe probability density
+    likelihoodNeutrino->Scale(1. / likelihoodNeutrino->Integral("width"));
+    likelihoodMass->Scale(1. / likelihoodMass->Integral("width"));
 }
 
 
