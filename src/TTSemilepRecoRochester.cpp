@@ -180,6 +180,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
         
         
         // Update the cached values
+        cachedBTopLep = &bTopLep;
         cachedP4Nu = p4Nu;
         cachedLogLikelihoodNu = std::log(likelihoodNeutrino->GetBinContent(bin));
         
