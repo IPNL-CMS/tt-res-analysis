@@ -129,6 +129,9 @@ protected:
      * interpretation its rank is computed with method ComputeRank, and the interpretation with the
      * highest rank is accepted.
      * 
+     * The outermost loop runs over possible ways to choose the b-quark jet from the
+     * semileptonically decaying top quark.
+     * 
      * If the event contain less than for jets satisfying the selection, reconstruction is not
      * performed. In this case the highest rank is set to -infinity.
      * 
@@ -145,7 +148,13 @@ protected:
     void SetRecoFailure(unsigned code);
     
 private:
-    /// A pure virtual method to calculate rank of a given interpretation of the current event
+    /**
+     * \brief Pure virtual method to calculate rank of a given interpretation of the current event
+     * 
+     * When this method is called, the outermost loop runs over ways to choose the b-quark jet from
+     * the leptonically decaying top quark, which allows the derived class to implement a simple
+     * caching for reconstruction of the neutrino.
+     */
     virtual double ComputeRank(Jet const &bTopLep, Jet const &bTopHad, Jet const &q1TopHad,
       Jet const &q2TopHad) = 0;
     

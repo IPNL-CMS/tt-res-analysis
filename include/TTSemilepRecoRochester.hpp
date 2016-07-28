@@ -6,6 +6,7 @@
 
 #include <TH1.h>
 #include <TH2.h>
+#include <TLorentzVector.h>
 
 #include <memory>
 
@@ -132,6 +133,20 @@ private:
     
     /// Current best neutrino candidate
     Candidate neutrino;
+    
+    /**
+     * \brief Pointer to b-quark jet from t -> blv in the last considered interpretation
+     * 
+     * It allows to implement caching of neutrino reconstruction. The pointer must be reset to null
+     * at the start of processing of each new event.
+     */
+    Jet const *cachedBTopLep;
+    
+    /// Cached four-momentum of reconstructed neutrino
+    TLorentzVector cachedP4Nu;
+    
+    /// Cached log-likelihood corresponding to the neutrino
+    double cachedLogLikelihoodNu;
     
     /// Flags that help to deduce reason of failed reconstruction
     bool neutrinoReconstructed, neutrinoLikelihoodInRange, massLikelihoodInRange;

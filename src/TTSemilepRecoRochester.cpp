@@ -136,28 +136,49 @@ void TTSemilepRecoRochester::SetLikelihood(std::string const &path,
 double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHad,
   Jet const &q1TopHad, Jet const &q2TopHad)
 {
-    // Reconstruct the neutrino. Skip the current interpretation if it cannot be reconstructed
-    NuRecoRochester nuBuilder(&lepton->P4(), &bTopLep.P4());
-    
-    if (not nuBuilder.IsReconstructable())
-        return -std::numeric_limits<double>::infinity();
-    
-    double nuDistance;
-    TLorentzVector const p4Nu(nuBuilder.GetBest(met->P4().Px(), met->P4().Py(), 1., 1., 0.,
-      nuDistance));
-    nuDistance = std::sqrt(nuDistance);  // It is actually set to the squared value
-    neutrinoReconstructed = true;
+    double logLikelihood = 0.;
+    TLorentzVector p4Nu;
     
     
-    // Compute (logarithm of) the likelihood for the neutrino distance. If the distance falls into
-    //the overflow bin of the histogram, reject the current interpretation
-    int bin = likelihoodNeutrino->FindFixBin(nuDistance);
-    
-    if (likelihoodNeutrino->IsBinOverflow(bin))
-        return -std::numeric_limits<double>::infinity();
-    
-    neutrinoLikelihoodInRange = true;
-    double logLikelihood = std::log(likelihoodNeutrino->GetBinContent(bin));
+    // Check if the b-quark jet from t -> blv has changed since previous interpretation
+    if (&bTopLep == cachedBTopLep)
+    {
+        // The jet is the same. No need to reconstruct the neutrino again
+        logLikelihood += cachedLogLikelihoodNu;
+        p4Nu = cachedP4Nu;
+    }
+    else
+    {
+        // Reconstruct the neutrino. Skip the current interpretation if it cannot be reconstructed
+        NuRecoRochester nuBuilder(&lepton->P4(), &bTopLep.P4());
+        
+        if (not nuBuilder.IsReconstructable())
+            return -std::numeric_limits<double>::infinity();
+        
+        double nuDistance;
+        p4Nu = nuBuilder.GetBest(met->P4().Px(), met->P4().Py(), 1., 1., 0., nuDistance);
+        nuDistance = std::sqrt(nuDistance);  // It is actually set to the squared value
+        neutrinoReconstructed = true;
+        
+        
+        // Compute (logarithm of) the likelihood for the neutrino distance. If the distance falls
+        //into the overflow bin of the histogram, reject the current interpretation
+        int bin = likelihoodNeutrino->FindFixBin(nuDistance);
+        
+        if (likelihoodNeutrino->IsBinOverflow(bin))
+            return -std::numeric_limits<double>::infinity();
+        
+        neutrinoLikelihoodInRange = true;
+        
+        
+        // Update the cached values
+        cachedP4Nu = p4Nu;
+        cachedLogLikelihoodNu = std::log(likelihoodNeutrino->GetBinContent(bin));
+        
+        
+        // Include neutrino likelihood to the full one
+        logLikelihood += cachedLogLikelihoodNu;
+    }
     
     
     // Compute masses of hadronically decaying top quark and W boson
@@ -168,7 +189,7 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     
     // Add (logarithm of) the likelihood for the masses. Reject the current interpretation is at
     //least one of the masses falls into overflow
-    bin = likelihoodMass->FindFixBin(mW, mTop);
+    int bin = likelihoodMass->FindFixBin(mW, mTop);
     
     if (likelihoodMass->IsBinOverflow(bin))
         return -std::numeric_limits<double>::infinity();
@@ -205,6 +226,10 @@ bool TTSemilepRecoRochester::ProcessEvent()
     neutrino.SetPxPyPzE(0., 0., 0., 0.);
     
     neutrinoReconstructed = neutrinoLikelihoodInRange = massLikelihoodInRange = false;
+    
+    
+    // Clear the cache
+    cachedBTopLep = nullptr;
     
     
     // Perform jet assigment calling dedicated method from the base class
