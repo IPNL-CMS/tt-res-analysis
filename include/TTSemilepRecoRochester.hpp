@@ -18,15 +18,25 @@ class LeptonReader;
  * \class TTSemilepRecoRochester
  * \brief Reconstructs semileptonic tt decays following the Rochester algorithm
  * 
+ * Reconstruction of the neutrino is delegated to class NuRecoRochester, which exploits constraints
+ * from masses of the top quark and the W boson. Each event interpretation is ranked using a
+ * (logarithm of the) product of two likelihood functions. One describes distribution of the
+ * figure of merit used in the neutrino reconstruction, the other one represents the joint
+ * distribution of the two reconstructed masses.
  * 
+ * All possible jet assignments are considered, without any restriction due to b-tagging.
+ * 
+ * A version of this algorithm was used in TOP-16-008 (AN-16-020).
  */
 class TTSemilepRecoRochester: public TTSemilepRecoBase
 {
 public:
     /**
-     * \brief Constructor
+     * \brief Creates reconstruction plugin with the given name
      * 
-     * 
+     * User is encouraged to keep the default name. In order to complete configuration of the
+     * plugin, likelihood functions for the reconstruction must be provided using method
+     * SetLikelihood.
      */
     TTSemilepRecoRochester(std::string name = "TTReco");
     
@@ -61,8 +71,7 @@ public:
     /**
      * \brief Returns reconstructed neutrino from the t->blv decay
      * 
-     * This is one of neutrinos reconstructed by the dedicated plugin. Throws an exception if
-     * the collection of neutrinos is empty or the jet assignment has been aborted.
+     * Throws an exception if the event reconstruction has failed for the current event.
      * 
      * Implemeted from TTSemilepRecoBase.
      */
@@ -72,7 +81,8 @@ public:
      * \brief Provides likelihood function for reconstruction
      * 
      * The path to a ROOT file is resolved using FileInPath. Throws exceptions if the file is not
-     * found or it does not contain one of the required histograms.
+     * found or it does not contain one of the required histograms. The histograms do not need to
+     * be normalized.
      */
     void SetLikelihood(std::string const &path,
       std::string const histNeutrinoName = "nusolver_chi2_right",
@@ -82,8 +92,9 @@ private:
     /**
      * \brief Computes rank of the given event interpretation
      * 
-     * The rank is defined as -chi^2. All neutrino solutions are considered, and the highest rank
-     * (corresponding to smallest chi^2) is returned.
+     * The rank is defined as the logarithm of the likelihood computed with the figure of merit for
+     * the neutrino reconstruction and masses of hadronically decaying t quark and W boson. A
+     * simple caching is implemented for the neutrino reconstruction.
      * 
      * Implemented from TTSemilepRecoBase.
      */
@@ -93,7 +104,8 @@ private:
     /**
      * \brief Performs reconstruction of the current event
      * 
-     * Calls PerformJetAssignment from the base class.
+     * Calls PerformJetAssignment from the base class. Identifies reason for reconstruction
+     * failure.
      * 
      * Reimplemented from TTSemilepRecoBase.
      */

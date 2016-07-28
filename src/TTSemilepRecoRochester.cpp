@@ -70,6 +70,14 @@ Lepton const &TTSemilepRecoRochester::GetLepton() const
 
 Candidate const &TTSemilepRecoRochester::GetNeutrino() const
 {
+    if (GetRecoStatus() != 0)
+    {
+        std::ostringstream message;
+        message << "TTSemilepRecoRochester[\"" << GetName() <<
+          "\"]::GetNeutrino: Event reconstruction has failed for the current event.";
+        throw std::runtime_error(message.str());
+    }
+    
     return neutrino;
 }
 
@@ -237,7 +245,7 @@ bool TTSemilepRecoRochester::ProcessEvent()
     
     
     // Declare failure of the reconstruction if the best rank is (-inf). This could have happend
-    //only if all event interpretations have been rejected
+    //only if all event interpretations have been rejected or have zero likelihood
     if (GetRank() == -std::numeric_limits<double>::infinity())
     {
         if (not neutrinoReconstructed)
