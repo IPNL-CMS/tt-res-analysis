@@ -18,14 +18,16 @@
 
 TTSemilepRecoRochester::TTSemilepRecoRochester(std::string name /*= "TTReco"*/):
     TTSemilepRecoBase(name),
-    leptonPluginName("Leptons"), leptonPlugin(nullptr)
+    leptonPluginName("Leptons"), leptonPlugin(nullptr),
+    bTagAlgorithm(BTagger::Algorithm::CSV), bTagCut(-std::numeric_limits<double>::infinity())
 {}
 
 
 TTSemilepRecoRochester::TTSemilepRecoRochester(TTSemilepRecoRochester const &src):
     TTSemilepRecoBase(src),
     leptonPluginName(src.leptonPluginName), leptonPlugin(nullptr),
-    likelihoodNeutrino(src.likelihoodNeutrino), likelihoodMass(src.likelihoodMass)
+    likelihoodNeutrino(src.likelihoodNeutrino), likelihoodMass(src.likelihoodMass),
+    bTagAlgorithm(src.bTagAlgorithm), bTagCut(src.bTagCut)
 {}
 
 
@@ -79,6 +81,13 @@ Candidate const &TTSemilepRecoRochester::GetNeutrino() const
     }
     
     return neutrino;
+}
+
+
+void TTSemilepRecoRochester::SetBTagSelection(BTagger::Algorithm algorithm, double cut)
+{
+    bTagAlgorithm = algorithm;
+    bTagCut = cut;
 }
 
 
@@ -148,6 +157,14 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     TLorentzVector p4Nu;
     
     
+    // Check if the assumed b-quark jets pass the selection on the b-tagging (if any)
+    if (bTagCut > -std::numeric_limits<double>::infinity() and
+      (bTopLep.BTag(bTagAlgorithm) < bTagCut or bTopHad.BTag(bTagAlgorithm) < bTagCut))
+        return -std::numeric_limits<double>::infinity();
+    
+    bTaggedJetsFound = true;
+        
+        
     // Check if the b-quark jet from t -> blv has changed since previous interpretation
     if (&bTopLep == cachedBTopLep)
     {
@@ -234,6 +251,7 @@ bool TTSemilepRecoRochester::ProcessEvent()
     met = &jetmetPlugin->GetMET();
     neutrino.SetPxPyPzE(0., 0., 0., 0.);
     
+    bTaggedJetsFound = false;
     neutrinoReconstructed = neutrinoLikelihoodInRange = massLikelihoodInRange = false;
     
     
@@ -255,8 +273,10 @@ bool TTSemilepRecoRochester::ProcessEvent()
             SetRecoFailure(3);
         else if (not massLikelihoodInRange)
             SetRecoFailure(4);
-        else
+        else if (not bTaggedJetsFound)
             SetRecoFailure(5);
+        else
+            SetRecoFailure(6);
     }
     
     

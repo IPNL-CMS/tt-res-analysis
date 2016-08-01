@@ -24,7 +24,8 @@ class LeptonReader;
  * figure of merit used in the neutrino reconstruction, the other one represents the joint
  * distribution of the two reconstructed masses.
  * 
- * All possible jet assignments are considered, without any restriction due to b-tagging.
+ * By default, all possible jet assignments are considered. User can specify a selection on b tags
+ * of jets matched to b quarks.
  * 
  * A version of this algorithm was used in TOP-16-008 (AN-16-020).
  */
@@ -76,6 +77,14 @@ public:
      * Implemeted from TTSemilepRecoBase.
      */
     virtual Candidate const &GetNeutrino() const override;
+    
+    /**
+     * \brief Sets a selection on b tags of jets assigned to the b quarks
+     * 
+     * Only jets whose b-tagging discriminators are larger than the given cut are assigned to the
+     * b quarks. By default no selection is applied.
+     */
+    void SetBTagSelection(BTagger::Algorithm algorithm, double cut);
     
     /**
      * \brief Provides likelihood function for reconstruction
@@ -143,6 +152,12 @@ private:
      */
     std::shared_ptr<TH2> likelihoodMass;
     
+    /// Algorithm of b-tagging used to select jets to be matched to b quarks
+    BTagger::Algorithm bTagAlgorithm;
+    
+    /// Cut on b tags of jets that are matched to b quarks
+    double bTagCut;
+    
     /// Current best neutrino candidate
     Candidate neutrino;
     
@@ -161,5 +176,5 @@ private:
     double cachedLogLikelihoodNu;
     
     /// Flags that help to deduce reason of failed reconstruction
-    bool neutrinoReconstructed, neutrinoLikelihoodInRange, massLikelihoodInRange;
+    bool bTaggedJetsFound, neutrinoReconstructed, neutrinoLikelihoodInRange, massLikelihoodInRange;
 };
