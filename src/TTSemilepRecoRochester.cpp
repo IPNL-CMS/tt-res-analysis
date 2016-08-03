@@ -19,7 +19,8 @@
 TTSemilepRecoRochester::TTSemilepRecoRochester(std::string name /*= "TTReco"*/):
     TTSemilepRecoBase(name),
     leptonPluginName("Leptons"), leptonPlugin(nullptr),
-    bTagAlgorithm(BTagger::Algorithm::CSV), bTagCut(-std::numeric_limits<double>::infinity())
+    bTagAlgorithm(BTagger::Algorithm::CSV), bTagCut(-std::numeric_limits<double>::infinity()),
+    bTagSelAtLeastOne(false)
 {}
 
 
@@ -27,7 +28,8 @@ TTSemilepRecoRochester::TTSemilepRecoRochester(TTSemilepRecoRochester const &src
     TTSemilepRecoBase(src),
     leptonPluginName(src.leptonPluginName), leptonPlugin(nullptr),
     likelihoodNeutrino(src.likelihoodNeutrino), likelihoodMass(src.likelihoodMass),
-    bTagAlgorithm(src.bTagAlgorithm), bTagCut(src.bTagCut)
+    bTagAlgorithm(src.bTagAlgorithm), bTagCut(src.bTagCut),
+    bTagSelAtLeastOne(src.bTagSelAtLeastOne)
 {}
 
 
@@ -84,10 +86,12 @@ Candidate const &TTSemilepRecoRochester::GetNeutrino() const
 }
 
 
-void TTSemilepRecoRochester::SetBTagSelection(BTagger::Algorithm algorithm, double cut)
+void TTSemilepRecoRochester::SetBTagSelection(BTagger::Algorithm algorithm, double cut,
+  bool atLeastOne /*= false*/)
 {
     bTagAlgorithm = algorithm;
     bTagCut = cut;
+    bTagSelAtLeastOne = atLeastOne;
 }
 
 
@@ -158,9 +162,19 @@ double TTSemilepRecoRochester::ComputeRank(Jet const &bTopLep, Jet const &bTopHa
     
     
     // Check if the assumed b-quark jets pass the selection on the b-tagging (if any)
-    if (bTagCut > -std::numeric_limits<double>::infinity() and
-      (bTopLep.BTag(bTagAlgorithm) < bTagCut or bTopHad.BTag(bTagAlgorithm) < bTagCut))
-        return -std::numeric_limits<double>::infinity();
+    if (bTagCut > -std::numeric_limits<double>::infinity())
+    {
+        if (bTagSelAtLeastOne)
+        {
+            if (bTopLep.BTag(bTagAlgorithm) < bTagCut and bTopHad.BTag(bTagAlgorithm) < bTagCut)
+                return -std::numeric_limits<double>::infinity();
+        }
+        else
+        {
+            if (bTopLep.BTag(bTagAlgorithm) < bTagCut or bTopHad.BTag(bTagAlgorithm) < bTagCut)
+                return -std::numeric_limits<double>::infinity();
+        }
+    }
     
     bTaggedJetsFound = true;
         

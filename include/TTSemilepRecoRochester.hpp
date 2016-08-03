@@ -82,9 +82,10 @@ public:
      * \brief Sets a selection on b tags of jets assigned to the b quarks
      * 
      * Only jets whose b-tagging discriminators are larger than the given cut are assigned to the
-     * b quarks. By default no selection is applied.
+     * b quarks. Depending on the last argument, this is required for either both b quarks or at
+     * least one of them. By default no selection is applied.
      */
-    void SetBTagSelection(BTagger::Algorithm algorithm, double cut);
+    void SetBTagSelection(BTagger::Algorithm algorithm, double cut, bool atLeastOne = false);
     
     /**
      * \brief Provides likelihood function for reconstruction
@@ -157,6 +158,9 @@ private:
     
     /// Cut on b tags of jets that are matched to b quarks
     double bTagCut;
+    
+    /// Flag showing if the cut on b tags should be applied to at least one of both b quarks
+    bool bTagSelAtLeastOne;
     
     /// Current best neutrino candidate
     Candidate neutrino;
