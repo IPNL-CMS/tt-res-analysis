@@ -39,6 +39,8 @@ void TTObservables::BeginRun(Dataset const &)
     tree->Branch("EtaTT", &bfEtaTT);
     tree->Branch("DRTT", &bfDRTT);
     
+    tree->Branch("CosTopLepTT", &bfCosTopLepTT);
+    
     ROOTLock::Unlock();
 }
 
@@ -79,6 +81,12 @@ bool TTObservables::ProcessEvent()
         bfMassTT = p4TT.M();
         bfEtaTT = p4TT.Eta();
         bfDRTT = p4TopLep.DeltaR(p4TopHad);
+        
+        TVector3 const boostTT(p4TT.BoostVector());
+        TLorentzVector boostedTopLep(p4TopLep);
+        boostedTopLep.Boost(-boostTT);  // boost into the tt rest frame
+        
+        bfCosTopLepTT = (boostedTopLep.Vect() * p4TT.Vect()) / (boostedTopLep.P() * p4TT.P());
     }
     else
     {
@@ -87,6 +95,7 @@ bool TTObservables::ProcessEvent()
         bfMassTopLep = bfMassTopHad = bfMassWHad = bfPtTT = 0.;
         bfPtTopLep = bfPtTopHad = 0.;
         bfMassTT = bfEtaTT = bfDRTT = 0.;
+        bfCosTopLepTT = 0.;
     }
     
     

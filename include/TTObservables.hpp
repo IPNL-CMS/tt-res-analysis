@@ -76,4 +76,8 @@ private:
     Float_t bfPtTopLep, bfPtTopHad;
     Float_t bfMassTT, bfEtaTT;
     Float_t bfDRTT;
+    
+    // The angle between momenta of the leptonically decaying top quark in the tt rest frame and
+    //the tt system in the lab rest frame
+    Float_t bfCosTopLepTT;
 };
