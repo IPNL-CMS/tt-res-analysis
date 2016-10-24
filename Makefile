@@ -15,10 +15,11 @@ endif
 
 
 # Flags to control compilation and linking
-CC = g++
-INCLUDE = -I$(TTRES_ANALYSIS_INSTALL)/include -I$(MENSURA_INSTALL)/include -I$(shell root-config --incdir)
-OPFLAGS = -O2
-CFLAGS = -Wall -Wextra -Wno-unused-function -fPIC -std=c++14 $(INCLUDE) $(OPFLAGS)
+CC := g++
+INCLUDE := -I$(TTRES_ANALYSIS_INSTALL)/include -I$(MENSURA_INSTALL)/include -I$(shell root-config --incdir)
+OPFLAGS := -O2
+CFLAGS := -Wall -Wextra -Wno-unused-function -fPIC -std=c++14 $(INCLUDE) $(OPFLAGS)
+LDFLAGS := -L$(MENSURA_INSTALL)/lib -lmensura -lPECReader -Wl,-rpath=$(MENSURA_INSTALL)/lib
 
 
 # Sources, object files, and library
@@ -44,7 +45,7 @@ all: $(LIB_PATH)
 $(LIB_PATH): $(OBJECTS)
 	@ mkdir -p $(LIB_DIR)
 	@ rm -f $@
-	$(CC) -shared -Wl,-soname,$(LIB_NAME) -o $@ $^
+	$(CC) -shared -Wl,-soname,$(LIB_NAME) -o $@ $^ $(LDFLAGS)
 
 
 $(OBJ_DIR)/%.o: $(SOURCE_DIR)/%.cpp
