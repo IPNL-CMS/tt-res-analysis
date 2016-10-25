@@ -12,18 +12,15 @@
 class BTagWPService;
 class LeptonReader;
 class JetMETReader;
-class PECGeneratorReader;
-class PECTriggerFilter;
 class PileUpReader;
 class TFileService;
-class WeightCollector;
 
 
 /**
  * \class BasicObservables
  * \brief A plugin to store basic kinematical information
  * 
- * Saves TTree with a number of simple observables. Also stores event weights.
+ * Saves TTree with a number of simple observables.
  */
 class BasicObservables: public AnalysisPlugin
 {
@@ -53,7 +50,7 @@ public:
      * 
      * Reimplemented from Plugin.
      */
-    virtual void BeginRun(Dataset const &dataset) override;
+    virtual void BeginRun(Dataset const &) override;
     
     /**
      * \brief Creates a newly configured clone
@@ -104,34 +101,6 @@ private:
     /// Non-owning pointer to the plugin that reads information about pile-up
     PileUpReader const *puPlugin;
     
-    /// Name of trigger filter
-    std::string triggerFilterName;
-    
-    /// Non-owning pointer to the trigger filter
-    PECTriggerFilter const *triggerFilter;
-    
-    /// Name of plugin that provides generator-level weight
-    std::string generatorPluginName;
-    
-    /// Non-owning pointer to plugin that provides generator-level weight
-    PECGeneratorReader const *generatorPlugin;
-    
-    /// Name of a plugin that collects event weights
-    std::string weightCollectorName;
-    
-    /// Non-owning pointer to a plugin that collects event weights
-    WeightCollector const *weightCollector;
-    
-    /// Flag showing if the current dataset is data or simulation
-    bool isMC;
-    
-    /**
-     * \brief Common event weight for the current dataset
-     * 
-     * Equals cross section divided by the number of events in the dataset.
-     */
-    double weightDataset;
-    
     /// Non-owning pointer to output tree
     TTree *tree;
     
@@ -140,10 +109,9 @@ private:
     Float_t Pt_Lep, Eta_Lep;
     Float_t Pt_J1, Eta_J1, Pt_J2, Eta_J2, Pt_J3, Pt_J4;
     Float_t Pt_BJ1;
-    Float_t CSV_J1, CSV_J2;
+    Float_t bTag_J1, bTag_J2;
     Float_t M_J1J2, DR_J1J2;
     Float_t Ht, St;
     Float_t MET, Phi_MET, MtW;
     Int_t nPV;
-    Float_t weights[7];
 };

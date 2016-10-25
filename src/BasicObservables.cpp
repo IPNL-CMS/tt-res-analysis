@@ -9,10 +9,6 @@
 #include <mensura/core/ROOTLock.hpp>
 
 #include <mensura/extensions/TFileService.hpp>
-#include <mensura/extensions/WeightCollector.hpp>
-
-#include <mensura/PECReader/PECGeneratorReader.hpp>
-#include <mensura/PECReader/PECTriggerFilter.hpp>
 
 
 BasicObservables::BasicObservables(BTagger const &bTagger_):
@@ -22,10 +18,7 @@ BasicObservables::BasicObservables(BTagger const &bTagger_):
     bTagWPServiceName("BTagWP"), bTagWPService(nullptr),
     leptonPluginName("Leptons"), leptonPlugin(nullptr),
     jetmetPluginName("JetMET"), jetmetPlugin(nullptr),
-    puPluginName("PileUp"), puPlugin(nullptr),
-    triggerFilterName("TriggerFilter"), triggerFilter(nullptr),
-    generatorPluginName("Generator"), generatorPlugin(nullptr),
-    weightCollectorName("EventWeights"), weightCollector(nullptr)
+    puPluginName("PileUp"), puPlugin(nullptr)
 {}
 
 
@@ -36,18 +29,12 @@ BasicObservables::BasicObservables(BasicObservables const &src):
     bTagWPServiceName(src.bTagWPServiceName), bTagWPService(nullptr),
     leptonPluginName(src.leptonPluginName), leptonPlugin(nullptr),
     jetmetPluginName(src.jetmetPluginName), jetmetPlugin(nullptr),
-    puPluginName(src.puPluginName), puPlugin(nullptr),
-    triggerFilterName(src.triggerFilterName), triggerFilter(nullptr),
-    generatorPluginName(src.generatorPluginName), generatorPlugin(nullptr),
-    weightCollectorName(src.weightCollectorName), weightCollector(nullptr)
+    puPluginName(src.puPluginName), puPlugin(nullptr)
 {}
 
 
-void BasicObservables::BeginRun(Dataset const &dataset)
+void BasicObservables::BeginRun(Dataset const &)
 {
-    isMC = dataset.IsMC();
-    
-    
     // Save pointers to services and readers
     fileService = dynamic_cast<TFileService const *>(GetMaster().GetService(fileServiceName));
     bTagWPService = dynamic_cast<BTagWPService const *>(GetMaster().GetService(bTagWPServiceName));
@@ -55,18 +42,6 @@ void BasicObservables::BeginRun(Dataset const &dataset)
     leptonPlugin = dynamic_cast<LeptonReader const *>(GetDependencyPlugin(leptonPluginName));
     jetmetPlugin = dynamic_cast<JetMETReader const *>(GetDependencyPlugin(jetmetPluginName));
     puPlugin = dynamic_cast<PileUpReader const *>(GetDependencyPlugin(puPluginName));
-    
-    
-    // Save pointer to reweighting plugins
-    if (isMC)
-    {
-        triggerFilter =
-          dynamic_cast<PECTriggerFilter const *>(GetDependencyPlugin(triggerFilterName));
-        generatorPlugin =
-          dynamic_cast<PECGeneratorReader const *>(GetDependencyPlugin(generatorPluginName));
-        weightCollector =
-          dynamic_cast<WeightCollector const *>(GetDependencyPlugin(weightCollectorName));
-    }
     
     
     // Create output tree
@@ -90,8 +65,8 @@ void BasicObservables::BeginRun(Dataset const &dataset)
     tree->Branch("Pt_J4", &Pt_J4);
     tree->Branch("Pt_BJ1", &Pt_BJ1);
     
-    tree->Branch("CSV_J1", &CSV_J1);
-    tree->Branch("CSV_J2", &CSV_J2);
+    tree->Branch("bTag_J1", &bTag_J1);
+    tree->Branch("bTag_J2", &bTag_J2);
     
     tree->Branch("M_J1J2", &M_J1J2);
     tree->Branch("DR_J1J2", &DR_J1J2);
@@ -103,15 +78,7 @@ void BasicObservables::BeginRun(Dataset const &dataset)
     tree->Branch("MtW", &MtW);
     tree->Branch("nPV", &nPV);
     
-    if (isMC)
-        tree->Branch("weights", weights, "weights[7]/F");
-    
     ROOTLock::Unlock();
-    
-    
-    // Common event weight in this dataset
-    auto const &firstFile = dataset.GetFiles().front();
-    weightDataset = firstFile.GetWeight();
 }
 
 
@@ -146,14 +113,14 @@ bool BasicObservables::ProcessEvent()
     {
         Pt_J1 = jets[0].Pt();
         Eta_J1 = jets[0].Eta();
-        CSV_J1 = jets[0].BTag(BTagger::Algorithm::CMVA);
+        bTag_J1 = jets[0].BTag(BTagger::Algorithm::CMVA);
     }
     
     if (jets.size() > 1)
     {
         Pt_J2 = jets[1].Pt();
         Eta_J2 = jets[1].Eta();
-        CSV_J2 = jets[1].BTag(BTagger::Algorithm::CMVA);
+        bTag_J2 = jets[1].BTag(BTagger::Algorithm::CMVA);
         
         M_J1J2 = (jets[0].P4() + jets[1].P4()).M();
         DR_J1J2 = jets[0].P4().DeltaR(jets[1].P4());
@@ -197,21 +164,6 @@ bool BasicObservables::ProcessEvent()
     nPV = puPlugin->GetNumVertices();
     
     St = Ht + Pt_Lep + MET;
-    
-    
-    if (isMC)
-    {
-        double const w = weightDataset * triggerFilter->GetWeight() *
-          generatorPlugin->GetNominalWeight();
-        
-        weights[0] = w * weightCollector->GetWeight();
-        weights[1] = w * weightCollector->GetWeightUp("PileUpWeight", 0);
-        weights[2] = w * weightCollector->GetWeightDown("PileUpWeight", 0);
-        weights[3] = w * weightCollector->GetWeightUp("BTagWeight", 0);
-        weights[4] = w * weightCollector->GetWeightDown("BTagWeight", 0);
-        weights[5] = w * weightCollector->GetWeightUp("BTagWeight", 1);
-        weights[6] = w * weightCollector->GetWeightDown("BTagWeight", 1);
-    }
     
     
     tree->Fill();
