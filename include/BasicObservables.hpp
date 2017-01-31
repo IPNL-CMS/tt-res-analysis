@@ -105,7 +105,7 @@ private:
     TTree *tree;
     
     // Output buffers
-    Int_t nJet30, nBJet30;
+    Int_t nJet30, nJet20, nBJet30, nBJet20;
     Float_t Pt_Lep, Eta_Lep;
     Float_t Pt_J1, Eta_J1, Pt_J2, Eta_J2, Pt_J3, Pt_J4;
     Float_t Pt_BJ1;
@@ -114,4 +114,5 @@ private:
     Float_t Ht, St;
     Float_t MET, Phi_MET, MtW;
     Int_t nPV;
+    Float_t Rho;
 };

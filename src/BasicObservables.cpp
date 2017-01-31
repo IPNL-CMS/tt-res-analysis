@@ -52,7 +52,9 @@ void BasicObservables::BeginRun(Dataset const &)
     ROOTLock::Lock();
     
     tree->Branch("nJet30", &nJet30);
+    tree->Branch("nJet20", &nJet20);
     tree->Branch("nBJet30", &nBJet30);
+    tree->Branch("nBJet20", &nBJet20);
     
     tree->Branch("Pt_Lep", &Pt_Lep);
     tree->Branch("Eta_Lep", &Eta_Lep);
@@ -77,6 +79,7 @@ void BasicObservables::BeginRun(Dataset const &)
     tree->Branch("Phi_MET", &Phi_MET);
     tree->Branch("MtW", &MtW);
     tree->Branch("nPV", &nPV);
+    tree->Branch("Rho", &Rho);
     
     ROOTLock::Unlock();
 }
@@ -134,19 +137,28 @@ bool BasicObservables::ProcessEvent()
     
     
     nJet30 = nBJet30 = 0;
+    nJet20 = nBJet20 = 0;
     Ht = 0.;
     
     for (auto const &j: jets)
     {
         Ht += j.Pt();
         
-        if (j.Pt() < 30.)
-            continue;
+        if (j.Pt() > 20.)
+        {        
+            ++nJet20;
+            
+            if (bTagWPService->IsTagged(bTagger, j))
+                ++nBJet20;
+        }
         
-        ++nJet30;
-        
-        if (bTagWPService->IsTagged(bTagger, j))
-            ++nBJet30;
+        if (j.Pt() > 30.)
+        {        
+            ++nJet30;
+            
+            if (bTagWPService->IsTagged(bTagger, j))
+                ++nBJet30;
+        }
     }
     
     Pt_BJ1 = 0.;
@@ -161,7 +173,9 @@ bool BasicObservables::ProcessEvent()
     
     MET = met.Pt();
     Phi_MET = met.Phi();
+    
     nPV = puPlugin->GetNumVertices();
+    Rho = puPlugin->GetRho();
     
     St = Ht + Pt_Lep + MET;
     
