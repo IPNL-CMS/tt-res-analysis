@@ -146,6 +146,9 @@ void TTSemilepRecoBase::PerformJetAssignment(std::vector<Jet> const &jets)
                 for (unsigned iiQ2TopHadCand = iiQ1TopHadCand + 1; iiQ2TopHadCand < nSelectedJets;
                   ++iiQ2TopHadCand)
                 {
+                    if (iiQ2TopHadCand == iiBTopLepCand or iiQ2TopHadCand == iiBTopHadCand)
+                        continue;
+                    
                     // An interpretation has been constructed. Evaluate it
                     double const rank = ComputeRank(jets.at(selectedJetIndices.at(iiBTopLepCand)),
                       jets.at(selectedJetIndices.at(iiBTopHadCand)),
