@@ -149,8 +149,8 @@ void TTSemilepRecoRochester::SetLikelihood(std::string const &path,
     
     
     // Make sure the histograms are normalized to describe probability density
-    likelihoodNeutrino->Scale(1. / likelihoodNeutrino->Integral("width"));
-    likelihoodMass->Scale(1. / likelihoodMass->Integral("width"));
+    likelihoodNeutrino->Scale(1. / likelihoodNeutrino->Integral(), "width");
+    likelihoodMass->Scale(1. / likelihoodMass->Integral(), "width");
 }
 
 
