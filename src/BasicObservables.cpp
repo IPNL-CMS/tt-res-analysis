@@ -77,6 +77,7 @@ void BasicObservables::BeginRun(Dataset const &)
     
     tree->Branch("MET", &MET);
     tree->Branch("Phi_MET", &Phi_MET);
+    tree->Branch("DPhi_LepNu", &DPhi_LepNu);
     tree->Branch("MtW", &MtW);
     tree->Branch("nPV", &nPV);
     tree->Branch("Rho", &Rho);
@@ -104,9 +105,10 @@ bool BasicObservables::ProcessEvent()
         Eta_Lep = lep.Eta();
         MtW = sqrt(pow(lep.Pt() + met.Pt(), 2) - pow(lep.P4().Px() + met.P4().Px(), 2) -
          pow(lep.P4().Py() + met.P4().Py(), 2));
+        DPhi_LepNu = TVector2::Phi_mpi_pi(lep.Phi() - met.Phi());
     }
     else
-        Pt_Lep = Eta_Lep = MtW = 0.;
+        Pt_Lep = Eta_Lep = MtW = DPhi_LepNu = 0.;
     
     
     auto const &jets = jetmetPlugin->GetJets();

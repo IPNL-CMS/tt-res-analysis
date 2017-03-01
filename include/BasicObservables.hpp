@@ -112,7 +112,7 @@ private:
     Float_t bTag_J1, bTag_J2;
     Float_t M_J1J2, DR_J1J2;
     Float_t Ht, St;
-    Float_t MET, Phi_MET, MtW;
+    Float_t MET, Phi_MET, DPhi_LepNu, MtW;
     Int_t nPV;
     Float_t Rho;
 };
