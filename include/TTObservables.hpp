@@ -72,10 +72,9 @@ private:
     // Output buffers
     Float_t bfBestRank;
     UShort_t bfRecoStatus;
-    Float_t bfMassTopLep, bfMassTopHad, bfMassWHad, bfPtTT;
+    Float_t bfMassTopLep, bfMassTopHad, bfMassWHad;
     Float_t bfPtTopLep, bfPtTopHad;
-    Float_t bfMassTT, bfEtaTT;
-    Float_t bfDRTT;
+    Float_t bfMassTT, bfPtTT, bfRapidityTT, bfDRTT;
     
     // The angle between momenta of the leptonically decaying top quark in the tt rest frame and
     //the tt system in the lab rest frame

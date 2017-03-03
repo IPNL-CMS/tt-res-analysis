@@ -30,13 +30,13 @@ void TTObservables::BeginRun(Dataset const &)
     tree->Branch("MassTopLep", &bfMassTopLep);
     tree->Branch("MassTopHad", &bfMassTopHad);
     tree->Branch("MassWHad", &bfMassWHad);
-    tree->Branch("PtTT", &bfPtTT);
     
     tree->Branch("PtTopLep", &bfPtTopLep);
     tree->Branch("PtTopHad", &bfPtTopHad);
     
     tree->Branch("MassTT", &bfMassTT);
-    tree->Branch("EtaTT", &bfEtaTT);
+    tree->Branch("PtTT", &bfPtTT);
+    tree->Branch("RapidityTT", &bfRapidityTT);
     tree->Branch("DRTT", &bfDRTT);
     
     tree->Branch("CosTopLepTT", &bfCosTopLepTT);
@@ -73,13 +73,13 @@ bool TTObservables::ProcessEvent()
         bfMassTopHad = p4TopHad.M();
         bfMassWHad = (ttRecoPlugin->GetJet(TTSemilepRecoBase::DecayJet::q1TopHad).P4() +
           ttRecoPlugin->GetJet(TTSemilepRecoBase::DecayJet::q2TopHad).P4()).M();
-        bfPtTT = p4TT.Pt();
         
         bfPtTopLep = p4TopLep.Pt();
         bfPtTopHad = p4TopHad.Pt();
         
         bfMassTT = p4TT.M();
-        bfEtaTT = p4TT.Eta();
+        bfPtTT = p4TT.Pt();
+        bfRapidityTT = p4TT.Rapidity();
         bfDRTT = p4TopLep.DeltaR(p4TopHad);
         
         TVector3 const boostTT(p4TT.BoostVector());
@@ -92,9 +92,9 @@ bool TTObservables::ProcessEvent()
     {
         // Reconstruction has been aborted. Fill variables with some dummy values
         bfBestRank = 0.;
-        bfMassTopLep = bfMassTopHad = bfMassWHad = bfPtTT = 0.;
+        bfMassTopLep = bfMassTopHad = bfMassWHad = 0.;
         bfPtTopLep = bfPtTopHad = 0.;
-        bfMassTT = bfEtaTT = bfDRTT = 0.;
+        bfMassTT = bfPtTT = bfRapidityTT = bfDRTT = 0.;
         bfCosTopLepTT = 0.;
     }
     
