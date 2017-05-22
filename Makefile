@@ -16,10 +16,12 @@ endif
 
 # Flags to control compilation and linking
 CC := g++
-INCLUDE := -I$(TTRES_ANALYSIS_INSTALL)/include -I$(MENSURA_INSTALL)/include -I$(shell root-config --incdir)
+INCLUDE := -I$(TTRES_ANALYSIS_INSTALL)/include -I$(MENSURA_INSTALL)/include \
+  -I$(shell root-config --incdir) -I$(shell lhapdf-config --incdir)
 OPFLAGS := -O2
 CFLAGS := -Wall -Wextra -Wno-unused-function -fPIC -std=c++14 $(INCLUDE) $(OPFLAGS)
-LDFLAGS := -L$(MENSURA_INSTALL)/lib -lmensura -lPECReader -Wl,-rpath=$(MENSURA_INSTALL)/lib
+LDFLAGS := -L$(MENSURA_INSTALL)/lib -lmensura -lPECReader -Wl,-rpath=$(MENSURA_INSTALL)/lib \
+  $(shell lhapdf-config --libs)
 
 
 # Sources, object files, and library
