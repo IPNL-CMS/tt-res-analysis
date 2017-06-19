@@ -20,7 +20,6 @@
 #include <mensura/extensions/BTagSFService.hpp>
 #include <mensura/extensions/BTagWeight.hpp>
 #include <mensura/extensions/DatasetBuilder.hpp>
-#include <mensura/extensions/DatasetSelector.hpp>
 #include <mensura/extensions/GenWeightSyst.hpp>
 #include <mensura/extensions/JetFilter.hpp>
 #include <mensura/extensions/LeptonFilter.hpp>
@@ -60,7 +59,8 @@ enum class Channel
 enum class SampleGroup
 {
     Data,
-    MC
+    TT,
+    OtherMC
 };
 
 
@@ -124,11 +124,14 @@ int main(int argc, char **argv)
     
     if (sampleGroupText == "data")
         sampleGroup = SampleGroup::Data;
-    else if (sampleGroupText == "sim")
-        sampleGroup = SampleGroup::MC;
+    else if (sampleGroupText == "tt")
+        sampleGroup = SampleGroup::TT;
+    else if (sampleGroupText == "other")
+        sampleGroup = SampleGroup::OtherMC;
     else
     {
-        cerr << "Cannot recognize sample group \"" << sampleGroupText << "\".\n";
+        cerr << "Cannot recognize sample group \"" << sampleGroupText << "\". Supported groups "
+          "are \"data\", \"tt\", and \"other\" (for other simulation)\n";
         return EXIT_FAILURE;
     }
     
@@ -174,7 +177,9 @@ int main(int argc, char **argv)
     
     
     // Add a new search path
-    FileInPath::AddLocation(string(getenv("TTRES_ANALYSIS_INSTALL")) + "/data/");
+    string const installPath(getenv("TTRES_ANALYSIS_INSTALL"));
+    FileInPath::AddLocation(installPath + "/data/");
+    FileInPath::AddLocation(installPath + "/config/");
     
     
     // Input datasets
@@ -188,9 +193,22 @@ int main(int argc, char **argv)
         else
             datasets = datasetBuilder({"SingleElectron-Run2016_330_all"});
     }
+    else if (sampleGroup == SampleGroup::TT)
+    {
+        datasets = datasetBuilder({"ttbar-pw_330_all"});
+        
+        if (systType == "None")
+            datasets.splice(datasets.end(), datasetBuilder({
+              "ttbar-pw-isrup_330_ojF", "ttbar-pw-isrdown_330_all",
+              "ttbar-pw-fsrup_330_all", "ttbar-pw-fsrdown_330_all",
+              "ttbar-pw-hdampup_330_rAN", "ttbar-pw-hdampdown_330_HTS",
+              "ttbar-pw-m1755_330_all", "ttbar-pw-m1695_330_all",
+              "ttbar-pw-ueup_330_tmX", "ttbar-pw-uedown_330_ctt"
+            }));
+    }
     else
     {
-        datasets = datasetBuilder({"ttbar-pw_330_all",
+        datasets = datasetBuilder({
           "t-tchan-pw_330rc1_OBU", "tbar-tchan-pw_330rc1_LKv", "t-tWchan-pw_330rc1_ZYV",
           "tbar-tWchan-pw_330rc1_Gll", "t-schan-amcnlo_330_MNE",
           "Wjets-1j-mg_330rc1_feB", "Wjets-2j-mg_330rc1_aKV", "Wjets-3j-mg_330rc1_all",
@@ -293,15 +311,6 @@ int main(int argc, char **argv)
               "QCD-em-120-170_330_all", "QCD-em-170-300_330_PDg", "QCD-em-300-inf_330_vQG",
               "QCD-bce-20-30_330_YWN", "QCD-bce-30-80_330_uuz", "QCD-bce-80-170-bkp_330_jpV",
               "QCD-bce-170-250_330_MfK", "QCD-bce-250-inf_330_MWY"}));
-        
-        if (systType == "None")
-            datasets.splice(datasets.end(), datasetBuilder({
-              "ttbar-pw-isrup_330_ojF", "ttbar-pw-isrdown_330_all",
-              "ttbar-pw-fsrup_330_all", "ttbar-pw-fsrdown_330_all",
-              "ttbar-pw-hdampup_330_rAN", "ttbar-pw-hdampdown_330_HTS",
-              "ttbar-pw-m1755_330_all", "ttbar-pw-m1695_330_all",
-              "ttbar-pw-ueup_330_tmX", "ttbar-pw-uedown_330_ctt"
-            }));
     }
     
     
@@ -397,37 +406,41 @@ int main(int argc, char **argv)
         manager.RegisterPlugin(bTagReweighter);
         
         
+        PECGeneratorReader *generatorReader = new PECGeneratorReader;
+        
+        if (sampleGroup == SampleGroup::TT)
+            generatorReader->RequestAltWeights();
+        
+        manager.RegisterPlugin(generatorReader);
+        
+        
         // Dedicated reweighting for signal
         LOSystWeights *scaleWeights = new LOSystWeights(2, "NNPDF30_lo_as_0130");
         scaleWeights->SelectDatasets({"A-.+", "H-.+"});
         manager.RegisterPlugin(scaleWeights);
         
         
-        // Reweighting specific to SM tt only.  Only apply it for the nominal sample.
-        manager.RegisterPlugin(new DatasetSelector("TTSelector", {"ttbar-pw_330_all"}));
-        
-        PECGeneratorReader *generatorReader = new PECGeneratorReader;
-        generatorReader->RequestAltWeights();
-        manager.RegisterPlugin(generatorReader);
-        
-        manager.RegisterPlugin(new PECGenParticleReader());
-        
-        GenWeightSyst *genWeightSyst = new GenWeightSyst("genWeightVars.json");
-        genWeightSyst->NormalizeByMeanWeights(
-          "/gridgroup/cms/popov/PECData/2016Charlie/lheWeights_v1.json");
-        manager.RegisterPlugin(genWeightSyst);
-        
-        TopPtWeight *topPtWeights = new TopPtWeight();
-        topPtWeights->SelectDatasets({"ttbar-pw_330_all"});
-        manager.RegisterPlugin(topPtWeights);
-        
-        
-        // WeightCollector is added with a dependency on an older plugin than the tt selector so
-        //that it runs for all events. The two plugins that produce tt-specific weights will only
-        //report trivial nominal weights for other datasets, even though they will not be run.
-        manager.RegisterPlugin(new WeightCollector({"LeptonSFWeight", "PileUpWeight",
-          "BTagWeight", "GenWeightSyst", "TopPtWeight", "LOSystWeights"}),
-          {bTagReweighter->GetName()});
+        // For SM tt use additional weights
+        if (sampleGroup == SampleGroup::TT)
+        {
+            manager.RegisterPlugin(new PECGenParticleReader());
+            
+            GenWeightSyst *genWeightSyst = new GenWeightSyst("genWeightVars.json");
+            genWeightSyst->NormalizeByMeanWeights(
+              "/gridgroup/cms/popov/PECData/2016Charlie/lheWeights_v1.json");
+            manager.RegisterPlugin(genWeightSyst);
+            
+            TopPtWeight *topPtWeights = new TopPtWeight();
+            topPtWeights->SelectDatasets({"ttbar-pw_330_all"});
+            manager.RegisterPlugin(topPtWeights);
+            
+            
+            manager.RegisterPlugin(new WeightCollector({"LeptonSFWeight", "PileUpWeight",
+              "BTagWeight", "GenWeightSyst", "TopPtWeight"}));
+        }
+        else
+            manager.RegisterPlugin(new WeightCollector({"LeptonSFWeight", "PileUpWeight",
+              "BTagWeight", "LOSystWeights"}));
     }
     
     

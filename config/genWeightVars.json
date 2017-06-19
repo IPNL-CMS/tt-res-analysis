@@ -1,0 +1,10 @@
+[
+  {
+    "datasetId": "ttbar-pw_330_all",
+    "weightPairs": [[1, 2], [3, 6], [4, 8]]
+  },
+  {
+    "datasetId": "*",
+    "weightPairs": []
+  }
+]
