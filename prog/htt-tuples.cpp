@@ -466,7 +466,7 @@ int main(int argc, char **argv)
     
     
     // Process the datasets
-    manager.Process(1);
+    manager.Process(16);
     
     
     return EXIT_SUCCESS;
