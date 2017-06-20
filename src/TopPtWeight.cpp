@@ -115,14 +115,14 @@ bool TopPtWeight::ProcessEvent()
         {
             if (std::abs(d->GetPdgId()) != 24)
             {
-                topP4[nTopFound] += d->P4();
+                topP4[nTopFound - 1] += d->P4();
                 ++nDaughters;
             }
             else
             {
                 for (auto const &dW: d->GetDaughters())  // There are no chains like W->W->...
                 {
-                    topP4[nTopFound] += dW->P4();
+                    topP4[nTopFound - 1] += dW->P4();
                     ++nDaughters;
                 }
             }
