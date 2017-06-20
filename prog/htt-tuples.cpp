@@ -431,7 +431,7 @@ int main(int argc, char **argv)
             manager.RegisterPlugin(genWeightSyst);
             
             TopPtWeight *topPtWeights = new TopPtWeight();
-            topPtWeights->SelectDatasets({"ttbar-pw_330_all"});
+            topPtWeights->SelectDatasets({"ttbar-pw_330_all", "ttbar-pw-.*"});
             manager.RegisterPlugin(topPtWeights);
             
             
