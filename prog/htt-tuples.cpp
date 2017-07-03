@@ -184,133 +184,133 @@ int main(int argc, char **argv)
     
     // Input datasets
     list<Dataset> datasets;
-    DatasetBuilder datasetBuilder("/gridgroup/cms/popov/PECData/2016Charlie/samples_v3.json");
+    DatasetBuilder datasetBuilder("/gridgroup/cms/popov/PECData/2016Delta/samples_v1.json");
     
     if (sampleGroup == SampleGroup::Data)
     {
         if (channel == Channel::Muon)
-            datasets = datasetBuilder({"SingleMuon-Run2016_330_all"});
+            datasets = datasetBuilder({"SingleMuon-Run2016_333_all"});
         else
-            datasets = datasetBuilder({"SingleElectron-Run2016_330_all"});
+            datasets = datasetBuilder({"SingleElectron-Run2016_333_all"});
     }
     else if (sampleGroup == SampleGroup::TT)
     {
-        datasets = datasetBuilder({"ttbar-pw_330_all"});
+        datasets = datasetBuilder({"ttbar-pw_333_all"});
         
         if (systType == "None")
             datasets.splice(datasets.end(), datasetBuilder({
-              "ttbar-pw-isrup_330_ojF", "ttbar-pw-isrdown_330_all",
-              "ttbar-pw-fsrup_330_all", "ttbar-pw-fsrdown_330_all",
-              "ttbar-pw-hdampup_330_rAN", "ttbar-pw-hdampdown_330_HTS",
-              "ttbar-pw-m1755_330_all", "ttbar-pw-m1695_330_all",
-              "ttbar-pw-ueup_330_tmX", "ttbar-pw-uedown_330_ctt"
+              "ttbar-pw-isrup_333_Jic", "ttbar-pw-isrdown_333_all",
+              "ttbar-pw-fsrup_333_all", "ttbar-pw-fsrdown_333_all",
+              "ttbar-pw-hdampup_333_all", "ttbar-pw-hdampdown_333_all",
+              "ttbar-pw-m1755_333_all", "ttbar-pw-m1695_333_all",
+              "ttbar-pw-ueup_333_all", "ttbar-pw-uedown_333_all"
             }));
     }
     else
     {
         datasets = datasetBuilder({
-          "t-tchan-pw_330rc1_OBU", "tbar-tchan-pw_330rc1_LKv", "t-tWchan-pw_330rc1_ZYV",
-          "tbar-tWchan-pw_330rc1_Gll", "t-schan-amcnlo_330_MNE",
-          "Wjets-1j-mg_330rc1_feB", "Wjets-2j-mg_330rc1_aKV", "Wjets-3j-mg_330rc1_all",
-          "Wjets-4j-mg_330rc1_all", "DY-mg_330rc1_all",
-          "WW_330_gaS", "WZ_330_jyL", "ZZ_330_EqH",
-          "ttW-lep_330_oSc", "ttW-had_330_Abh", "ttZ-lep_330_WGU", "ttZ-had_330_hfg"});
+          "t-tchan-pw_333_ecs", "tbar-tchan-pw_333_MWZ", "t-tWchan-pw_333_WoS",
+          "tbar-tWchan-pw_333_eGC", "t-schan-amcnlo_333_ErJ",
+          "Wjets-1j-mg_333_JKN", "Wjets-2j-mg_333_QrW", "Wjets-3j-mg_333_all",
+          "Wjets-4j-mg_333_all", "DY-mg_333_all",
+          "WW_333_qpN", "WZ_333_qsl", "ZZ_333_ydJ",
+          "ttW-lep_333_QUK", "ttW-had_333_mya", "ttZ-lep_333_QWi", "ttZ-had_333_Vpe"});
         
         datasets.splice(datasets.end(), datasetBuilder({
-          "A-res-semilep-m400-relW2p5_hSj", "A-res-dilep-m400-relW2p5_iWO",
-          "A-res-semilep-m400-relW5_Tdt", "A-res-dilep-m400-relW5_SZC",
-          "A-res-semilep-m400-relW10_HvC", "A-res-dilep-m400-relW10_dAW",
-          "A-res-semilep-m400-relW25_zMT", "A-res-dilep-m400-relW25_whQ",
-          "A-res-semilep-m400-relW50_FFv", "A-res-dilep-m400-relW50_OpI",
-          "A-res-semilep-m500-relW2p5_hXS", "A-res-dilep-m500-relW2p5_wyD",
-          "A-res-semilep-m500-relW5_UUA", "A-res-dilep-m500-relW5_AwY",
-          "A-res-semilep-m500-relW10_HEU", "A-res-dilep-m500-relW10_Yip",
-          "A-res-semilep-m500-relW25_Rwg", "A-res-dilep-m500-relW25_TaZ",
-          "A-res-semilep-m500-relW50_mIo", "A-res-dilep-m500-relW50_jyT",
-          "A-res-semilep-m600-relW2p5_Xbg", "A-res-dilep-m600-relW2p5_NAO",
-          "A-res-semilep-m600-relW5_xAs", "A-res-dilep-m600-relW5_AuN",
-          "A-res-semilep-m600-relW10_unA", "A-res-dilep-m600-relW10_jfm",
-          "A-res-semilep-m600-relW25_ZIp", "A-res-dilep-m600-relW25_Kps",
-          "A-res-semilep-m600-relW50_sJU", "A-res-dilep-m600-relW50_oWP",
-          "A-res-semilep-m750-relW2p5_dSV", "A-res-dilep-m750-relW2p5_uth",
-          "A-res-semilep-m750-relW5_jAk", "A-res-dilep-m750-relW5_qth",
-          "A-res-semilep-m750-relW10_gWH", "A-res-dilep-m750-relW10_hOd",
-          "A-res-semilep-m750-relW25_ZaF", "A-res-dilep-m750-relW25_iYk",
-          "A-res-semilep-m750-relW50_lUC", "A-res-dilep-m750-relW50_Vlv",
-          "A-int-semilep-m400-relW2p5_ibc", "A-int-dilep-m400-relW2p5_Joq",
-          "A-int-semilep-m400-relW5_NPp", "A-int-dilep-m400-relW5_YLE",
-          "A-int-semilep-m400-relW10_jgF", "A-int-dilep-m400-relW10_TPI",
-          "A-int-semilep-m400-relW25_Xmd", "A-int-dilep-m400-relW25_JKV",
-          "A-int-semilep-m400-relW50_kVF", "A-int-dilep-m400-relW50_BdM",
-          "A-int-semilep-m500-relW2p5_YDF", "A-int-dilep-m500-relW2p5_JUJ",
-          "A-int-semilep-m500-relW5_uyS", "A-int-dilep-m500-relW5_OyZ",
-          "A-int-semilep-m500-relW10_Ijy", "A-int-dilep-m500-relW10_fRi",
-          "A-int-semilep-m500-relW25_ZKN", "A-int-dilep-m500-relW25_umJ",
-          "A-int-semilep-m500-relW50_mbt", "A-int-dilep-m500-relW50_Hgv",
-          "A-int-semilep-m600-relW2p5_ZDm", "A-int-dilep-m600-relW2p5_FBJ",
-          "A-int-semilep-m600-relW5_vQy", "A-int-dilep-m600-relW5_MWQ",
-          "A-int-semilep-m600-relW10_ugm", "A-int-dilep-m600-relW10_Ghx",
-          "A-int-semilep-m600-relW25_HYu", "A-int-dilep-m600-relW25_ySC",
-          "A-int-semilep-m600-relW50_lpK", "A-int-dilep-m600-relW50_ZXh",
-          "A-int-semilep-m750-relW2p5_Oqn", "A-int-dilep-m750-relW2p5_wNo",
-          "A-int-semilep-m750-relW5_IgW", "A-int-dilep-m750-relW5_DxN",
-          "A-int-semilep-m750-relW10_Hve", "A-int-dilep-m750-relW10_Aiv",
-          "A-int-semilep-m750-relW25_EOV", "A-int-dilep-m750-relW25_DhG",
-          "A-int-semilep-m750-relW50_xRp", "A-int-dilep-m750-relW50_MaU",
-          "H-res-semilep-m400-relW2p5_332_Msw", "H-res-dilep-m400-relW2p5_332_gEi",
-          "H-res-semilep-m400-relW5_332_CTk", "H-res-dilep-m400-relW5_332_pOM",
-          "H-res-semilep-m400-relW10_332_jTl", "H-res-dilep-m400-relW10_332_pOY",
-          "H-res-semilep-m400-relW25_332_CQc", "H-res-dilep-m400-relW25_332_eTZ",
-          "H-res-semilep-m400-relW50_332_nwU", "H-res-dilep-m400-relW50_332_XhS",
-          "H-res-semilep-m500-relW2p5_332_clu", "H-res-dilep-m500-relW2p5_332_KXG",
-          "H-res-semilep-m500-relW5_332_aQQ", "H-res-dilep-m500-relW5_332_Gkt",
-          "H-res-semilep-m500-relW10_332_fFV", "H-res-dilep-m500-relW10_332_fGi",
-          "H-res-semilep-m500-relW25_332_HEf", "H-res-dilep-m500-relW25_332_cFM",
-          "H-res-semilep-m500-relW50_332_npg", "H-res-dilep-m500-relW50_332_tNA",
-          "H-res-semilep-m600-relW2p5_332_Nco", "H-res-dilep-m600-relW2p5_332_DYi",
-          "H-res-semilep-m600-relW5_332_BYp", "H-res-dilep-m600-relW5_332_wsF",
-          "H-res-semilep-m600-relW10_332_Fqm", "H-res-dilep-m600-relW10_332_FTU",
-          "H-res-semilep-m600-relW25_332_RbK", "H-res-dilep-m600-relW25_332_lZC",
-          "H-res-semilep-m600-relW50_332_mBi", "H-res-dilep-m600-relW50_332_ljX",
-          "H-res-semilep-m750-relW2p5_332_SIz", "H-res-dilep-m750-relW2p5_332_KrU",
-          "H-res-semilep-m750-relW5_332_RKo", "H-res-dilep-m750-relW5_332_QMO",
-          "H-res-semilep-m750-relW10_332_iMW", "H-res-dilep-m750-relW10_332_oEz",
-          "H-res-semilep-m750-relW25_332_liv", "H-res-dilep-m750-relW25_332_agK",
-          "H-res-semilep-m750-relW50_332_JeQ", "H-res-dilep-m750-relW50_332_Xws",
-          "H-int-semilep-m400-relW2p5_332_Uyv", "H-int-dilep-m400-relW2p5_332_NyN",
-          "H-int-semilep-m400-relW5_332_TSO", "H-int-dilep-m400-relW5_332_umr",
-          "H-int-semilep-m400-relW10_332_AsU", "H-int-dilep-m400-relW10_332_Rtd",
-          "H-int-semilep-m400-relW25_332_MpC", "H-int-dilep-m400-relW25_332_kqh",
-          "H-int-semilep-m400-relW50_332_MSk", "H-int-dilep-m400-relW50_332_eux",
-          "H-int-semilep-m500-relW2p5_332_pvi", "H-int-dilep-m500-relW2p5_332_Epv",
-          "H-int-semilep-m500-relW5_332_zsm", "H-int-dilep-m500-relW5_332_NYZ",
-          "H-int-semilep-m500-relW10_332_xBb", "H-int-dilep-m500-relW10_332_Ksa",
-          "H-int-semilep-m500-relW25_332_lpS", "H-int-dilep-m500-relW25_332_Mcg",
-          "H-int-semilep-m500-relW50_332_DAa", "H-int-dilep-m500-relW50_332_lNS",
-          "H-int-semilep-m600-relW2p5_332_rXQ", "H-int-dilep-m600-relW2p5_332_kCu",
-          "H-int-semilep-m600-relW5_332_GHN", "H-int-dilep-m600-relW5_332_Kfj",
-          "H-int-semilep-m600-relW10_332_nvS", "H-int-dilep-m600-relW10_332_DZL",
-          "H-int-semilep-m600-relW25_332_zGL", "H-int-dilep-m600-relW25_332_YIG",
-          "H-int-semilep-m600-relW50_332_BJB", "H-int-dilep-m600-relW50_332_kXR",
-          "H-int-semilep-m750-relW2p5_332_PUI", "H-int-dilep-m750-relW2p5_332_nWR",
-          "H-int-semilep-m750-relW5_332_APZ", "H-int-dilep-m750-relW5_332_CfS",
-          "H-int-semilep-m750-relW10_332_uzR", "H-int-dilep-m750-relW10_332_LFo",
-          "H-int-semilep-m750-relW25_332_BAb", "H-int-dilep-m750-relW25_332_xrC",
-          "H-int-semilep-m750-relW50_332_jUO", "H-int-dilep-m750-relW50_332_wbr"
+          "A-res-semilep-m400-relW2p5_333_ckX", "A-res-dilep-m400-relW2p5_333_AJR",
+          "A-res-semilep-m400-relW5_333_Gcq", "A-res-dilep-m400-relW5_333_dEC",
+          "A-res-semilep-m400-relW10_333_qpo", "A-res-dilep-m400-relW10_333_rqN",
+          "A-res-semilep-m400-relW25_333_Jxx", "A-res-dilep-m400-relW25_333_UJg",
+          "A-res-semilep-m400-relW50_333_vTE", "A-res-dilep-m400-relW50_333_hzH",
+          "A-res-semilep-m500-relW2p5_333_Ory", "A-res-dilep-m500-relW2p5_333_kxt",
+          "A-res-semilep-m500-relW5_333_LYW", "A-res-dilep-m500-relW5_333_LFD",
+          "A-res-semilep-m500-relW10_333_FXK", "A-res-dilep-m500-relW10_333_wph",
+          "A-res-semilep-m500-relW25_333_aZp", "A-res-dilep-m500-relW25_333_sKi",
+          "A-res-semilep-m500-relW50_333_gEA", "A-res-dilep-m500-relW50_333_gmN",
+          "A-res-semilep-m600-relW2p5_333_ZBC", "A-res-dilep-m600-relW2p5_333_ApB",
+          "A-res-semilep-m600-relW5_333_hOz", "A-res-dilep-m600-relW5_333_qln",
+          "A-res-semilep-m600-relW10_333_Ibj", "A-res-dilep-m600-relW10_333_alD",
+          "A-res-semilep-m600-relW25_333_mlb", "A-res-dilep-m600-relW25_333_xbk",
+          "A-res-semilep-m600-relW50_333_Wto", "A-res-dilep-m600-relW50_333_Qpk",
+          "A-res-semilep-m750-relW2p5_333_IWi", "A-res-dilep-m750-relW2p5_333_TGM",
+          "A-res-semilep-m750-relW5_333_DKc", "A-res-dilep-m750-relW5_333_huq",
+          "A-res-semilep-m750-relW10_333_iPi", "A-res-dilep-m750-relW10_333_GIC",
+          "A-res-semilep-m750-relW25_333_ijc", "A-res-dilep-m750-relW25_333_AsE",
+          "A-res-semilep-m750-relW50_333_OEj", "A-res-dilep-m750-relW50_333_UxA",
+          "A-int-semilep-m400-relW2p5_333_LEx", "A-int-dilep-m400-relW2p5_333_ryF",
+          "A-int-semilep-m400-relW5_333_JyF", "A-int-dilep-m400-relW5_333_XQz",
+          "A-int-semilep-m400-relW10_333_WZQ", "A-int-dilep-m400-relW10_333_FLD",
+          "A-int-semilep-m400-relW25_333_Sqb", "A-int-dilep-m400-relW25_333_SRA",
+          "A-int-semilep-m400-relW50_333_qPD", "A-int-dilep-m400-relW50_333_NzY",
+          "A-int-semilep-m500-relW2p5_333_HRX", "A-int-dilep-m500-relW2p5_333_xIs",
+          "A-int-semilep-m500-relW5_333_oix", "A-int-dilep-m500-relW5_333_itg",
+          "A-int-semilep-m500-relW10_333_EMU", "A-int-dilep-m500-relW10_333_tcn",
+          "A-int-semilep-m500-relW25_333_DzU", "A-int-dilep-m500-relW25_333_pQh",
+          "A-int-semilep-m500-relW50_333_gvO", "A-int-dilep-m500-relW50_333_VzJ",
+          "A-int-semilep-m600-relW2p5_333_dYG", "A-int-dilep-m600-relW2p5_333_Ffd",
+          "A-int-semilep-m600-relW5_333_AHd", "A-int-dilep-m600-relW5_333_QBA",
+          "A-int-semilep-m600-relW10_333_FXb", "A-int-dilep-m600-relW10_333_Yow",
+          "A-int-semilep-m600-relW25_333_kjf", "A-int-dilep-m600-relW25_333_AgQ",
+          "A-int-semilep-m600-relW50_333_vdk", "A-int-dilep-m600-relW50_333_dSy",
+          "A-int-semilep-m750-relW2p5_333_lCs", "A-int-dilep-m750-relW2p5_333_ADQ",
+          "A-int-semilep-m750-relW5_333_jJe", "A-int-dilep-m750-relW5_333_LvY",
+          "A-int-semilep-m750-relW10_333_yPO", "A-int-dilep-m750-relW10_333_Trw",
+          "A-int-semilep-m750-relW25_333_Qdt", "A-int-dilep-m750-relW25_333_lzj",
+          "A-int-semilep-m750-relW50_333_tST", "A-int-dilep-m750-relW50_333_ZRR",
+          "H-res-semilep-m400-relW2p5_333_ORF", "H-res-dilep-m400-relW2p5_333_xvF",
+          "H-res-semilep-m400-relW5_333_yri", "H-res-dilep-m400-relW5_333_zzO",
+          "H-res-semilep-m400-relW10_333_rwm", "H-res-dilep-m400-relW10_333_hDn",
+          "H-res-semilep-m400-relW25_333_Jkz", "H-res-dilep-m400-relW25_333_HkF",
+          "H-res-semilep-m400-relW50_333_VLG", "H-res-dilep-m400-relW50_333_oGj",
+          "H-res-semilep-m500-relW2p5_333_klL", "H-res-dilep-m500-relW2p5_333_oFU",
+          "H-res-semilep-m500-relW5_333_vui", "H-res-dilep-m500-relW5_333_Ahe",
+          "H-res-semilep-m500-relW10_333_yLr", "H-res-dilep-m500-relW10_333_dzy",
+          "H-res-semilep-m500-relW25_333_hby", "H-res-dilep-m500-relW25_333_jVD",
+          "H-res-semilep-m500-relW50_333_rpY", "H-res-dilep-m500-relW50_333_jPK",
+          "H-res-semilep-m600-relW2p5_333_Ubo", "H-res-dilep-m600-relW2p5_333_Mrl",
+          "H-res-semilep-m600-relW5_333_eFQ", "H-res-dilep-m600-relW5_333_PLt",
+          "H-res-semilep-m600-relW10_333_anO", "H-res-dilep-m600-relW10_333_GDC",
+          "H-res-semilep-m600-relW25_333_FYm", "H-res-dilep-m600-relW25_333_Lgk",
+          "H-res-semilep-m600-relW50_333_tVh", "H-res-dilep-m600-relW50_333_yjt",
+          "H-res-semilep-m750-relW2p5_333_hCO", "H-res-dilep-m750-relW2p5_333_brb",
+          "H-res-semilep-m750-relW5_333_zmf", "H-res-dilep-m750-relW5_333_RgV",
+          "H-res-semilep-m750-relW10_333_xoP", "H-res-dilep-m750-relW10_333_ybn",
+          "H-res-semilep-m750-relW25_333_eWp", "H-res-dilep-m750-relW25_333_VQw",
+          "H-res-semilep-m750-relW50_333_uwo", "H-res-dilep-m750-relW50_333_AzS",
+          "H-int-semilep-m400-relW2p5_333_DaG", "H-int-dilep-m400-relW2p5_333_PyC",
+          "H-int-semilep-m400-relW5_333_ebU", "H-int-dilep-m400-relW5_333_oCG",
+          "H-int-semilep-m400-relW10_333_NOl", "H-int-dilep-m400-relW10_333_tlu",
+          "H-int-semilep-m400-relW25_333_JvM", "H-int-dilep-m400-relW25_333_RBI",
+          "H-int-semilep-m400-relW50_333_OcP", "H-int-dilep-m400-relW50_333_Caw",
+          "H-int-semilep-m500-relW2p5_333_QZi", "H-int-dilep-m500-relW2p5_333_MLm",
+          "H-int-semilep-m500-relW5_333_gSL", "H-int-dilep-m500-relW5_333_roN",
+          "H-int-semilep-m500-relW10_333_bOG", "H-int-dilep-m500-relW10_333_OhM",
+          "H-int-semilep-m500-relW25_333_tEG", "H-int-dilep-m500-relW25_333_FbC",
+          "H-int-semilep-m500-relW50_333_CsU", "H-int-dilep-m500-relW50_333_YPp",
+          "H-int-semilep-m600-relW2p5_333_LOk", "H-int-dilep-m600-relW2p5_333_CVz",
+          "H-int-semilep-m600-relW5_333_cae", "H-int-dilep-m600-relW5_333_bUg",
+          "H-int-semilep-m600-relW10_333_jZu", "H-int-dilep-m600-relW10_333_cOO",
+          "H-int-semilep-m600-relW25_333_Wyh", "H-int-dilep-m600-relW25_333_XEx",
+          "H-int-semilep-m600-relW50_333_Urx", "H-int-dilep-m600-relW50_333_Qbn",
+          "H-int-semilep-m750-relW2p5_333_sYp", "H-int-dilep-m750-relW2p5_333_yRA",
+          "H-int-semilep-m750-relW5_333_iIp", "H-int-dilep-m750-relW5_333_yUA",
+          "H-int-semilep-m750-relW10_333_sIm", "H-int-dilep-m750-relW10_333_bwh",
+          "H-int-semilep-m750-relW25_333_yUk", "H-int-dilep-m750-relW25_333_DPk",
+          "H-int-semilep-m750-relW50_333_BxK", "H-int-dilep-m750-relW50_333_tEs"
         }));
         
-        if (channel == Channel::Muon)
-            datasets.splice(datasets.end(), datasetBuilder({"QCD-mu-15-20_330_JhB",
-              "QCD-mu-20-30_330_gEW", "QCD-mu-30-50_330_fUg", "QCD-mu-50-80_330_xQZ",
-              "QCD-mu-80-120_330_all", "QCD-mu-120-170_330_all", "QCD-mu-170-300_330_all",
-              "QCD-mu-300-470_330_all", "QCD-mu-470-600_330_all", "QCD-mu-600-800_330_all",
-              "QCD-mu-800-1000_330_all", "QCD-mu-1000-inf_330_all"}));
-        else
-            datasets.splice(datasets.end(), datasetBuilder({"QCD-em-20-30_330_Ctz",
-              "QCD-em-30-50_330_all", "QCD-em-50-80_330_all", "QCD-em-80-120_330_all",
-              "QCD-em-120-170_330_all", "QCD-em-170-300_330_PDg", "QCD-em-300-inf_330_vQG",
-              "QCD-bce-20-30_330_YWN", "QCD-bce-30-80_330_uuz", "QCD-bce-80-170-bkp_330_jpV",
-              "QCD-bce-170-250_330_MfK", "QCD-bce-250-inf_330_MWY"}));
+        // if (channel == Channel::Muon)
+        //     datasets.splice(datasets.end(), datasetBuilder({"QCD-mu-15-20_330_JhB",
+        //       "QCD-mu-20-30_330_gEW", "QCD-mu-30-50_330_fUg", "QCD-mu-50-80_330_xQZ",
+        //       "QCD-mu-80-120_330_all", "QCD-mu-120-170_330_all", "QCD-mu-170-300_330_all",
+        //       "QCD-mu-300-470_330_all", "QCD-mu-470-600_330_all", "QCD-mu-600-800_330_all",
+        //       "QCD-mu-800-1000_330_all", "QCD-mu-1000-inf_330_all"}));
+        // else
+        //     datasets.splice(datasets.end(), datasetBuilder({"QCD-em-20-30_330_Ctz",
+        //       "QCD-em-30-50_330_all", "QCD-em-50-80_330_all", "QCD-em-80-120_330_all",
+        //       "QCD-em-120-170_330_all", "QCD-em-170-300_330_PDg", "QCD-em-300-inf_330_vQG",
+        //       "QCD-bce-20-30_330_YWN", "QCD-bce-30-80_330_uuz", "QCD-bce-80-170-bkp_330_jpV",
+        //       "QCD-bce-170-250_330_MfK", "QCD-bce-250-inf_330_MWY"}));
     }
     
     
@@ -427,11 +427,11 @@ int main(int argc, char **argv)
             
             GenWeightSyst *genWeightSyst = new GenWeightSyst("genWeightVars.json");
             genWeightSyst->NormalizeByMeanWeights(
-              "/gridgroup/cms/popov/PECData/2016Charlie/lheWeights_v1.json");
+              "/gridgroup/cms/popov/PECData/2016Delta/lheWeights_v1.json");
             manager.RegisterPlugin(genWeightSyst);
             
             TopPtWeight *topPtWeights = new TopPtWeight();
-            topPtWeights->SelectDatasets({"ttbar-pw_330_all", "ttbar-pw-.*"});
+            topPtWeights->SelectDatasets({"ttbar-pw[-_].*"});
             manager.RegisterPlugin(topPtWeights);
             
             
