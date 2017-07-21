@@ -393,13 +393,19 @@ int main(int argc, char **argv)
           "simPUProfiles_80Xv2.root", 0.05));
         
         if (channel == Channel::Muon)
-            manager.RegisterPlugin(new LeptonSFWeight(Lepton::Flavour::Muon,
-              "MuonSF_2016_80Xv2.root",
-              {"Track", "ID_Tight", "Iso_Tight", "IsoMu24_OR_IsoTkMu24"}));
+        {
+            manager.RegisterPlugin(new LeptonSFWeight("TriggerSFWeight", Lepton::Flavour::Muon,
+              "MuonSF_2016_80Xv2.root", {"IsoMu24_OR_IsoTkMu24"}));
+            manager.RegisterPlugin(new LeptonSFWeight("LeptonSFWeight", Lepton::Flavour::Muon,
+              "MuonSF_2016_80Xv2.root", {"Track", "ID_Tight", "Iso_Tight"}));
+        }
         else
-            manager.RegisterPlugin(new LeptonSFWeight(Lepton::Flavour::Electron,
-              "ElectronSF_2016_80Xv2.root",
-              {"Track", "CutBasedID_Tight", "Ele27_WPTight_Gsf"}));
+        {
+            manager.RegisterPlugin(new LeptonSFWeight("TriggerSFWeight", Lepton::Flavour::Electron,
+              "ElectronSF_2016_80Xv2.root", {"Ele27_WPTight_Gsf"}));
+            manager.RegisterPlugin(new LeptonSFWeight("LeptonSFWeight", Lepton::Flavour::Electron,
+              "ElectronSF_2016_80Xv2.root", {"Track", "CutBasedID_Tight"}));
+        }
         
         BTagWeight *bTagReweighter = new BTagWeight(bTagger);
         bTagReweighter->RequestSystematics();
@@ -435,12 +441,12 @@ int main(int argc, char **argv)
             manager.RegisterPlugin(topPtWeights);
             
             
-            manager.RegisterPlugin(new WeightCollector({"LeptonSFWeight", "PileUpWeight",
-              "BTagWeight", "GenWeightSyst", "TopPtWeight"}));
+            manager.RegisterPlugin(new WeightCollector({"TriggerSFWeight", "LeptonSFWeight",
+              "PileUpWeight", "BTagWeight", "GenWeightSyst", "TopPtWeight"}));
         }
         else
-            manager.RegisterPlugin(new WeightCollector({"LeptonSFWeight", "PileUpWeight",
-              "BTagWeight", "LOSystWeights"}));
+            manager.RegisterPlugin(new WeightCollector({"TriggerSFWeight", "LeptonSFWeight",
+              "PileUpWeight", "BTagWeight", "LOSystWeights"}));
     }
     
     
