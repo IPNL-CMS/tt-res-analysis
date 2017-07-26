@@ -21,7 +21,9 @@
 #include <mensura/extensions/BTagWeight.hpp>
 #include <mensura/extensions/DatasetBuilder.hpp>
 #include <mensura/extensions/GenWeightSyst.hpp>
+#include <mensura/extensions/JetCorrectorService.hpp>
 #include <mensura/extensions/JetFilter.hpp>
+#include <mensura/extensions/JetMETUpdate.hpp>
 #include <mensura/extensions/LeptonFilter.hpp>
 #include <mensura/extensions/LeptonSFWeight.hpp>
 #include <mensura/extensions/MetFilter.hpp>
@@ -30,7 +32,7 @@
 #include <mensura/extensions/WeightCollector.hpp>
 
 #include <mensura/PECReader/PECGeneratorReader.hpp>
- #include <mensura/PECReader/PECGenParticleReader.hpp>
+#include <mensura/PECReader/PECGenParticleReader.hpp>
 #include <mensura/PECReader/PECInputData.hpp>
 #include <mensura/PECReader/PECJetMETReader.hpp>
 #include <mensura/PECReader/PECLeptonReader.hpp>
@@ -137,6 +139,7 @@ int main(int argc, char **argv)
     
     
     string systType("None");
+    string systJECSource;
     SystService::VarDirection systDirection = SystService::VarDirection::Undefined;
     
     if (optionsMap.count("syst"))
@@ -149,9 +152,9 @@ int main(int argc, char **argv)
         
         
         string systArg(optionsMap["syst"].as<string>());
-        boost::to_lower(systArg);
         
-        std::regex systRegex("(jec|jer|metuncl)[-_]?(up|down)", std::regex::extended);
+        std::regex systRegex("(JEC(:[A-Za-z0-9]+)?|JER|METUncl)[-_]?(Up|Down)",
+          std::regex::extended | std::regex::icase);
         std::smatch matchResult;
         
         if (not std::regex_match(systArg, matchResult, systRegex))
@@ -161,16 +164,32 @@ int main(int argc, char **argv)
         }
         else
         {
-            if (matchResult[1] == "jec")
+            if (matchResult[2].length() > 0)
+            {
+                // Non-empty JEC source is provided. This must be a JEC variation.
                 systType = "JEC";
-            else if (matchResult[1] == "jer")
-                systType = "JER";
-            else if (matchResult[1] == "metuncl")
-                systType = "METUncl";
+                systJECSource = matchResult[2].str().substr(1);
+            }
+            else
+            {
+                string systTypeInput(matchResult[1]);
+                boost::to_lower(systTypeInput);
+                
+                if (systTypeInput == "jec")
+                    systType = "JEC";
+                else if (systTypeInput == "jer")
+                    systType = "JER";
+                else if (systTypeInput == "metuncl")
+                    systType = "METUncl";
+            }
             
-            if (matchResult[2] == "up")
+            
+            string systDirectionInput(matchResult[3]);
+            boost::to_lower(systDirectionInput);
+            
+            if (systDirectionInput == "up")
                 systDirection = SystService::VarDirection::Up;
-            else if (matchResult[2] == "down")
+            else if (systDirectionInput == "down")
                 systDirection = SystService::VarDirection::Down;
         }
     }
@@ -354,12 +373,46 @@ int main(int argc, char **argv)
     outputNameStream << "output/" << channelText;
     
     if (systType != "None")
-        outputNameStream << "_" << systType << "_" <<
-          ((systDirection == SystService::VarDirection::Up) ? "up" : "down");
+    {
+        outputNameStream << "_" << systType << "_";
+        
+        if (not systJECSource.empty())
+            outputNameStream << systJECSource << "_";
+        
+        outputNameStream << ((systDirection == SystService::VarDirection::Up) ? "up" : "down");
+    }
     
     outputNameStream << "/%";
     
     manager.RegisterService(new TFileService(outputNameStream.str()));
+    
+    if (not systJECSource.empty())
+    {
+        // Variation of an individual JEC source has been requested. Will need to reapply JEC from
+        //scratch since the uncertainty is to be applied before the JER smearing. Type-1 correction
+        //in missing pt will also need to be redone.
+        JetCorrectorService *jetCorrFull = new JetCorrectorService("JetCorrFull");
+        jetCorrFull->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
+          "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
+          "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
+        jetCorrFull->SetJECUncertainty("Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt",
+          {systJECSource});
+        jetCorrFull->SetJER("Spring16_25nsV10_MC_SF_AK4PFchs.txt",
+          "Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+        manager.RegisterService(jetCorrFull);
+        
+        JetCorrectorService *jetCorrL1 = new JetCorrectorService("JetCorrL1");
+        jetCorrL1->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt"});
+        manager.RegisterService(jetCorrL1);
+        
+        JetCorrectorService *jetCorrFullNoSmear = new JetCorrectorService("JetCorrFullNoSmear");
+        jetCorrFullNoSmear->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
+          "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
+          "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
+        jetCorrFullNoSmear->SetJECUncertainty(
+          "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+        manager.RegisterService(jetCorrFullNoSmear);
+    }
     
     
     // Register plugins
@@ -375,16 +428,35 @@ int main(int argc, char **argv)
         manager.RegisterPlugin(new LeptonFilter("LeptonFilter", Lepton::Flavour::Electron,
           30., 2.5));
     
-    PECJetMETReader *jetReader = new PECJetMETReader;
-    jetReader->SetSelection(20., 2.4);
-    manager.RegisterPlugin(jetReader);
+    manager.RegisterPlugin(new PECPileUpReader);
+    
+    
+    if (systJECSource.empty())
+    {
+        PECJetMETReader *jetReader = new PECJetMETReader;
+        jetReader->SetSelection(20., 2.4);
+        manager.RegisterPlugin(jetReader);
+    }
+    else
+    {
+        PECJetMETReader *jetReader = new PECJetMETReader("OrigJetMET");
+        jetReader->SetSelection(20., 2.4);
+        jetReader->ReadRawMET();
+        manager.RegisterPlugin(jetReader);
+        
+        JetMETUpdate *jetmetUpdater = new JetMETUpdate;
+        jetmetUpdater->SetJetCorrection("JetCorrFull");
+        jetmetUpdater->SetJetCorrectionForMET("JetCorrFullNoSmear", "JetCorrL1", "", "");
+        jetmetUpdater->UseRawMET();
+        manager.RegisterPlugin(jetmetUpdater);
+    }
+    
     
     JetFilter *jetFilter = new JetFilter(20., bTagger);
     jetFilter->AddSelectionBin(4, -1, 2, -1);
     manager.RegisterPlugin(jetFilter);
     
     manager.RegisterPlugin(new MetFilter(MetFilter::Mode::MtW, 50.));
-    manager.RegisterPlugin(new PECPileUpReader);
     
     if (sampleGroup != SampleGroup::Data)
     {
