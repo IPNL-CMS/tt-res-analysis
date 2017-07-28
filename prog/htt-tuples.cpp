@@ -32,6 +32,7 @@
 #include <mensura/extensions/WeightCollector.hpp>
 
 #include <mensura/PECReader/PECGeneratorReader.hpp>
+#include <mensura/PECReader/PECGenJetMETReader.hpp>
 #include <mensura/PECReader/PECGenParticleReader.hpp>
 #include <mensura/PECReader/PECInputData.hpp>
 #include <mensura/PECReader/PECJetMETReader.hpp>
@@ -439,14 +440,17 @@ int main(int argc, char **argv)
     }
     else
     {
+        manager.RegisterPlugin(new PECGenJetMETReader);
+        
         PECJetMETReader *jetReader = new PECJetMETReader("OrigJetMET");
-        jetReader->SetSelection(20., 2.4);
         jetReader->ReadRawMET();
+        jetReader->SetGenJetReader(); // Default one
         manager.RegisterPlugin(jetReader);
         
         JetMETUpdate *jetmetUpdater = new JetMETUpdate;
         jetmetUpdater->SetJetCorrection("JetCorrFull");
         jetmetUpdater->SetJetCorrectionForMET("JetCorrFullNoSmear", "JetCorrL1", "", "");
+        jetmetUpdater->SetSelection(20., 2.4);
         jetmetUpdater->UseRawMET();
         manager.RegisterPlugin(jetmetUpdater);
     }
