@@ -96,6 +96,8 @@ int main(int argc, char **argv)
     }
     
     
+    bool const reapplyJEC = true;
+    
     if (not optionsMap.count("channel"))
     {
         cerr << "Required argument \e[1mchannel\e[0m is missing.\n";
@@ -387,7 +389,7 @@ int main(int argc, char **argv)
     
     manager.RegisterService(new TFileService(outputNameStream.str()));
     
-    if (not systJECSource.empty())
+    if (reapplyJEC)
     {
         // Variation of an individual JEC source has been requested. Will need to reapply JEC from
         //scratch since the uncertainty is to be applied before the JER smearing. Type-1 correction
@@ -396,8 +398,11 @@ int main(int argc, char **argv)
         jetCorrFull->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
           "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
           "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
-        jetCorrFull->SetJECUncertainty("Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt",
-          {systJECSource});
+        
+        if (systType == "JEC")
+            jetCorrFull->SetJECUncertainty(
+              "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+        
         jetCorrFull->SetJER("Spring16_25nsV10_MC_SF_AK4PFchs.txt",
           "Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
         manager.RegisterService(jetCorrFull);
@@ -410,8 +415,11 @@ int main(int argc, char **argv)
         jetCorrFullNoSmear->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
           "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
           "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
-        jetCorrFullNoSmear->SetJECUncertainty(
-          "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+        
+        if (systType == "JEC")
+            jetCorrFullNoSmear->SetJECUncertainty(
+              "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+        
         manager.RegisterService(jetCorrFullNoSmear);
     }
     
@@ -432,20 +440,22 @@ int main(int argc, char **argv)
     manager.RegisterPlugin(new PECPileUpReader);
     
     
-    if (systJECSource.empty())
+    if (not reapplyJEC)
     {
-        PECJetMETReader *jetReader = new PECJetMETReader;
-        jetReader->SetSelection(20., 2.4);
-        manager.RegisterPlugin(jetReader);
+        PECJetMETReader *jetmetReader = new PECJetMETReader;
+        jetmetReader->SetSelection(20., 2.4);
+        manager.RegisterPlugin(jetmetReader);
     }
     else
     {
         manager.RegisterPlugin(new PECGenJetMETReader);
         
-        PECJetMETReader *jetReader = new PECJetMETReader("OrigJetMET");
-        jetReader->ReadRawMET();
-        jetReader->SetGenJetReader(); // Default one
-        manager.RegisterPlugin(jetReader);
+        PECJetMETReader *jetmetReader = new PECJetMETReader("OrigJetMET");
+        jetmetReader->ReadRawMET();
+        jetmetReader->PropagateUnclVarToRaw();
+        jetmetReader->SetGenJetReader(); // Default one
+        jetmetReader->SetGenPtMatching("Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+        manager.RegisterPlugin(jetmetReader);
         
         JetMETUpdate *jetmetUpdater = new JetMETUpdate;
         jetmetUpdater->SetJetCorrection("JetCorrFull");
