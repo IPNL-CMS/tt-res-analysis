@@ -391,36 +391,66 @@ int main(int argc, char **argv)
     
     if (reapplyJEC)
     {
-        // Variation of an individual JEC source has been requested. Will need to reapply JEC from
-        //scratch since the uncertainty is to be applied before the JER smearing. Type-1 correction
-        //in missing pt will also need to be redone.
-        JetCorrectorService *jetCorrFull = new JetCorrectorService("JetCorrFull");
-        jetCorrFull->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
-          "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
-          "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
-        
-        if (systType == "JEC")
-            jetCorrFull->SetJECUncertainty(
-              "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
-        
-        jetCorrFull->SetJER("Spring16_25nsV10_MC_SF_AK4PFchs.txt",
-          "Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
-        manager.RegisterService(jetCorrFull);
-        
-        JetCorrectorService *jetCorrL1 = new JetCorrectorService("JetCorrL1");
-        jetCorrL1->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt"});
-        manager.RegisterService(jetCorrL1);
-        
-        JetCorrectorService *jetCorrFullNoSmear = new JetCorrectorService("JetCorrFullNoSmear");
-        jetCorrFullNoSmear->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
-          "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
-          "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
-        
-        if (systType == "JEC")
-            jetCorrFullNoSmear->SetJECUncertainty(
-              "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
-        
-        manager.RegisterService(jetCorrFullNoSmear);
+        if (sampleGroup != SampleGroup::Data)
+        {
+            JetCorrectorService *jetCorrFull = new JetCorrectorService("JetCorrFull");
+            jetCorrFull->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
+              "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
+              "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
+            
+            if (systType == "JEC")
+                jetCorrFull->SetJECUncertainty(
+                  "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+            
+            jetCorrFull->SetJER("Spring16_25nsV10_MC_SF_AK4PFchs.txt",
+              "Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+            manager.RegisterService(jetCorrFull);
+            
+            JetCorrectorService *jetCorrL1 = new JetCorrectorService("JetCorrL1");
+            jetCorrL1->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt"});
+            manager.RegisterService(jetCorrL1);
+            
+            JetCorrectorService *jetCorrFullNoSmear =
+              new JetCorrectorService("JetCorrFullNoSmear");
+            jetCorrFullNoSmear->SetJEC({"Summer16_23Sep2016V4_MC_L1FastJet_AK4PFchs.txt",
+              "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
+              "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt"});
+            
+            if (systType == "JEC")
+                jetCorrFullNoSmear->SetJECUncertainty(
+                  "Summer16_23Sep2016V4_MC_UncertaintySources_AK4PFchs.txt", {systJECSource});
+            
+            manager.RegisterService(jetCorrFullNoSmear);
+        }
+        else
+        {
+            JetCorrectorService *jetCorrFull = new JetCorrectorService("JetCorrFull");
+            jetCorrFull->RegisterIOV("BCD", 272007, 276811);
+            jetCorrFull->RegisterIOV("EF", 276831, 278801);
+            jetCorrFull->RegisterIOV("G", 278802, 280385);  // includes a part from era F
+            jetCorrFull->RegisterIOV("H", 280919, 284044);
+            
+            for (string const &era: {"BCD", "EF", "G", "H"})
+                jetCorrFull->SetJEC(era, {
+                  "Summer16_23Sep2016"s + era + "V4_DATA_L1FastJet_AK4PFchs.txt",
+                  "Summer16_23Sep2016V4_MC_L2Relative_AK4PFchs.txt",
+                  "Summer16_23Sep2016V4_MC_L3Absolute_AK4PFchs.txt",
+                  "Summer16_23Sep2016"s + era + "V4_DATA_L2L3Residual_AK4PFchs.txt"});
+            
+            manager.RegisterService(jetCorrFull);
+            
+            JetCorrectorService *jetCorrL1 = new JetCorrectorService("JetCorrL1");
+            jetCorrL1->RegisterIOV("BCD", 272007, 276811);
+            jetCorrL1->RegisterIOV("EF", 276831, 278801);
+            jetCorrL1->RegisterIOV("G", 278802, 280385);
+            jetCorrL1->RegisterIOV("H", 280919, 284044);
+            
+            for (string const &era: {"BCD", "EF", "G", "H"})
+                jetCorrL1->SetJEC(era, {
+                  "Summer16_23Sep2016"s + era + "V4_DATA_L1FastJet_AK4PFchs.txt"});
+            
+            manager.RegisterService(jetCorrL1);
+        }
     }
     
     
@@ -448,21 +478,37 @@ int main(int argc, char **argv)
     }
     else
     {
-        manager.RegisterPlugin(new PECGenJetMETReader);
-        
-        PECJetMETReader *jetmetReader = new PECJetMETReader("OrigJetMET");
-        jetmetReader->ReadRawMET();
-        jetmetReader->PropagateUnclVarToRaw();
-        jetmetReader->SetGenJetReader(); // Default one
-        jetmetReader->SetGenPtMatching("Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
-        manager.RegisterPlugin(jetmetReader);
-        
-        JetMETUpdate *jetmetUpdater = new JetMETUpdate;
-        jetmetUpdater->SetJetCorrection("JetCorrFull");
-        jetmetUpdater->SetJetCorrectionForMET("JetCorrFullNoSmear", "JetCorrL1", "", "");
-        jetmetUpdater->SetSelection(20., 2.4);
-        jetmetUpdater->UseRawMET();
-        manager.RegisterPlugin(jetmetUpdater);
+        if (sampleGroup != SampleGroup::Data)
+        {
+            manager.RegisterPlugin(new PECGenJetMETReader);
+            
+            PECJetMETReader *jetmetReader = new PECJetMETReader("OrigJetMET");
+            jetmetReader->ReadRawMET();
+            jetmetReader->PropagateUnclVarToRaw();
+            jetmetReader->SetGenJetReader(); // Default one
+            jetmetReader->SetGenPtMatching("Spring16_25nsV10_MC_PtResolution_AK4PFchs.txt");
+            manager.RegisterPlugin(jetmetReader);
+            
+            JetMETUpdate *jetmetUpdater = new JetMETUpdate;
+            jetmetUpdater->SetJetCorrection("JetCorrFull");
+            jetmetUpdater->SetJetCorrectionForMET("JetCorrFullNoSmear", "JetCorrL1", "", "");
+            jetmetUpdater->SetSelection(20., 2.4);
+            jetmetUpdater->UseRawMET();
+            manager.RegisterPlugin(jetmetUpdater);
+        }
+        else
+        {
+            PECJetMETReader *jetmetReader = new PECJetMETReader("OrigJetMET");
+            jetmetReader->ReadRawMET();
+            manager.RegisterPlugin(jetmetReader);
+            
+            JetMETUpdate *jetmetUpdater = new JetMETUpdate;
+            jetmetUpdater->SetJetCorrection("JetCorrFull");
+            jetmetUpdater->SetJetCorrectionForMET("JetCorrFull", "JetCorrL1", "", "");
+            jetmetUpdater->SetSelection(20., 2.4);
+            jetmetUpdater->UseRawMET();
+            manager.RegisterPlugin(jetmetUpdater);
+        }
     }
     
     
